@@ -51,6 +51,14 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <meta name="theme-color" content="#27272a" />
+        {/* Farcaster Frame compatibility */}
+        <meta name="fc:frame" content="vNext" />
+        <meta name="fc:frame:image" content="https://frametheglobe.xyz/og-image.png" />
+        <meta name="fc:frame:button:1" content="View Gallery" />
+        <meta name="fc:frame:post_url" content="https://frametheglobe.xyz" />
+        {/* Allow embedding in iframes */}
+        <meta httpEquiv="X-Frame-Options" content="ALLOWALL" />
+        <meta httpEquiv="Content-Security-Policy" content="frame-ancestors *" />
       </head>
       <body className="min-h-screen bg-gradient-to-br from-leica-50 via-leica-100/50 to-accent-50/30">
         <div className="min-h-screen">
