@@ -1,17 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Basic configuration for Vercel compatibility
+  // Basic configuration
   reactStrictMode: true,
-  swcMinify: true,
   
-  // Configure images
+  // Configure images for unoptimized serving
   images: {
-    remotePatterns: [
+    unoptimized: true,
+  },
+  
+  // Add Farcaster frame headers
+  async headers() {
+    return [
       {
-        protocol: 'https',
-        hostname: '**',
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors *',
+          },
+        ],
       },
-    ],
+    ];
   },
 }
 
