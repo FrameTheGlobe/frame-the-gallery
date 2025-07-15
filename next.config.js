@@ -1,31 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable React strict mode for better error catching
+  // Basic configuration for Vercel compatibility
   reactStrictMode: true,
+  swcMinify: true,
   
-  // Configure images to work with Vercel
+  // Configure images
   images: {
-    domains: ['localhost', 'frametheglobe.xyz'],
-    formats: ['image/webp'],
-  },
-  
-  // Add security headers for Farcaster frame compatibility
-  async headers() {
-    return [
+    remotePatterns: [
       {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: 'frame-ancestors *',
-          },
-        ],
+        protocol: 'https',
+        hostname: '**',
       },
-    ];
+    ],
   },
 }
 
