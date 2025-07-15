@@ -1,13 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove appDir experimental flag as it's now stable in Next.js 14
+  // Minimal configuration for Vercel deployment
   images: {
     domains: ['localhost', 'frametheglobe.xyz'],
-    unoptimized: false, // Let Vercel optimize images
   },
-  // Don't use standalone for Vercel deployment
-  swcMinify: true,
-  reactStrictMode: true,
+  // Add headers for Farcaster frame compatibility
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors *',
+          },
+        ],
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
