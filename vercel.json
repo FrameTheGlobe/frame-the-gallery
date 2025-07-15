@@ -1,21 +1,3 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm ci && npm run build",
-  "installCommand": "npm ci",
-  "outputDirectory": ".next",
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "ALLOWALL"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "frame-ancestors *"
-        }
-      ]
-    }
-  ]
+  "framework": "nextjs"
 }
