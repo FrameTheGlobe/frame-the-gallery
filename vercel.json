@@ -1,18 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
   "framework": "nextjs",
-  "functions": {
-    "app/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -27,6 +14,5 @@
         }
       ]
     }
-  ],
-  "alias": ["frametheglobe.xyz", "www.frametheglobe.xyz"]
+  ]
 }

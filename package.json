@@ -1,7 +1,7 @@
 {
-  "name": "photo-gallery-app",
+  "name": "framethegallery",
   "version": "1.0.0",
-  "description": "A simple photo gallery app for photographers to showcase portfolios",
+  "description": "Professional photography portfolio platform with Leica-inspired design",
   "private": true,
   "scripts": {
     "dev": "next dev",

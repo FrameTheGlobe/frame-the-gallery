@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
+  // Remove appDir experimental flag as it's now stable in Next.js 14
   images: {
-    domains: ['localhost'],
-    unoptimized: true, // For static export compatibility
+    domains: ['localhost', 'frametheglobe.xyz'],
+    unoptimized: false, // Let Vercel optimize images
   },
-  // Enable static export for Vercel
-  output: 'standalone',
+  // Don't use standalone for Vercel deployment
+  swcMinify: true,
+  reactStrictMode: true,
 }
 
 module.exports = nextConfig
