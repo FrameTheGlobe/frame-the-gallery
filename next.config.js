@@ -1,36 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Explicitly set output to export for static deployment
-  output: 'export',
-  
-  // Basic image configuration
+  // Standard Next.js configuration for Vercel
   images: {
     domains: ['localhost', 'frametheglobe.xyz'],
-    unoptimized: true, // Required for export output
   },
-  
-  // Disable trailing slashes
-  trailingSlash: false,
-  
-  // Add headers for Farcaster frame compatibility
-  // Note: headers only work in non-export mode, but keeping for reference
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: 'frame-ancestors *',
-          },
-        ],
-      },
-    ];
-  },
+  // Keep the Farcaster frame meta tags in layout.js instead of using headers
 }
 
 module.exports = nextConfig
