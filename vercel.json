@@ -1,7 +1,9 @@
 {
-  "version": 2,
-  "buildCommand": "npm run vercel-build",
-  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

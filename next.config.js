@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Basic configuration
-  reactStrictMode: true,
-  
-  // Configure images for unoptimized serving
+  // Only add what's absolutely necessary
   images: {
-    unoptimized: true,
+    domains: ['localhost', 'frametheglobe.xyz'],
   },
   
   // Add Farcaster frame headers
