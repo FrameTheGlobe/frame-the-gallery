@@ -1,94 +1,174 @@
-# 🖼️ FrameTheGallery - Visual Stories for Farcaster
+# FrameTheGallery 🖼️
 
-A beautiful and elegant photo gallery app designed specifically for the Farcaster community. FrameTheGallery helps photographers and creators showcase their visual stories with a modern, community-focused design and custom logo branding.
+A beautiful photo gallery mini app built for the Farcaster ecosystem. Upload, view, and share your favorite photos with the Farcaster community.
 
-## ✨ Features
+## Features
 
-- **🖼️ Custom Logo & Branding**: Beautiful FrameTheGallery logo with gradient design
-- **📷 Easy Photo Upload**: Drag & drop up to 10 photos to frame your story
-- **🎨 Elegant Gallery Display**: Responsive grid layout with smooth animations
-- **🔍 Enhanced Lightbox**: Full-size viewing with navigation and sharing controls
-- **💾 Local Storage**: Your framed moments persist across sessions
-- **📱 Mobile Optimized**: Fully responsive design for all devices
-- **🚀 Share Your Story**: Built-in sharing with community-focused messaging
-- **⚡ Smooth Performance**: Optimized images and beautiful transitions
-- **🎯 Farcaster Native**: Designed specifically for the Farcaster ecosystem
+- 📸 **Photo Upload**: Upload multiple photos with drag-and-drop support
+- 🔍 **Gallery Views**: Switch between grid and list views
+- 🔄 **Sorting Options**: Sort by newest, oldest, or name
+- 🔗 **Farcaster Integration**: Seamless authentication and sharing
+- 📱 **Responsive Design**: Works perfectly on desktop and mobile
+- 🎨 **Modern UI**: Beautiful, intuitive interface with smooth animations
+- 🚀 **Fast Performance**: Optimized loading and rendering
 
-## Tech Stack
+## Farcaster Mini App Features
 
-- **Frontend**: Next.js 14 with App Router
-- **Styling**: Tailwind CSS
-- **File Upload**: Native HTML5 File API
-- **Image Optimization**: Next.js Image component
-- **Deployment**: Vercel
+- ✅ **SDK Integration**: Built with @farcaster/miniapp-sdk
+- 🔐 **Quick Auth**: Seamless Farcaster authentication
+- 📢 **Cast Sharing**: Share photos directly to Farcaster
+- 👤 **User Context**: Access to user profile and data
+- 🎯 **Manifest Configuration**: Proper mini app discovery setup
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+
+- Node.js 22.11.0 or higher
+- npm, pnpm, or yarn
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone <your-repo-url>
-cd photo-gallery-app
-```
+   ```bash
+   git clone <repository-url>
+   cd frame-the-gallery
+   ```
 
 2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:3000`
+
+### Building for Production
+
 ```bash
-npm install
+npm run build
 ```
 
-3. Run the development server:
+The built files will be in the `dist` directory.
+
+### Deployment
+
+This app is configured for deployment on Vercel, but can be deployed to any static hosting service.
+
+For Vercel deployment:
 ```bash
-npm run dev
+npm run build
+vercel --prod
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) to see FrameTheGallery in action.
+## Farcaster Mini App Setup
 
-## Deployment
+### Manifest Configuration
 
-This app is optimized for Vercel deployment:
+The app includes a proper Farcaster manifest at `public/.well-known/farcaster.json` with:
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Deploy with one click
+- Account association for domain verification
+- Mini app metadata (name, icons, URLs)
+- Proper versioning and categorization
 
-## Usage
+### SDK Integration
 
-1. **Upload Photos**: Click the upload area or drag & drop up to 10 images
-2. **Preview**: View your uploaded photos in the gallery
-3. **Manage**: Remove photos by clicking the X button
-4. **Share**: Share your portfolio URL with others
+The app uses the official Farcaster Mini App SDK for:
 
-## 📁 Project Structure
+- User authentication (`sdk.actions.signIn()`)
+- App lifecycle management (`sdk.actions.ready()`)
+- Cast composition (`sdk.actions.composeCast()`)
+- Context access for user data
+
+### Testing in Farcaster
+
+1. Enable Developer Mode in Farcaster
+2. Deploy your app to a public URL
+3. Update the manifest URLs to match your deployment
+4. Test the app within the Farcaster client
+
+## Project Structure
 
 ```
-photo-gallery-app/
-├── app/
-│   ├── components/
-│   │   ├── Logo.jsx           # FrameTheGallery custom logo
-│   │   ├── PhotoUpload.jsx    # Photo upload component
-│   │   └── PhotoGallery.jsx   # Gallery display component
-│   ├── globals.css            # Global styles with custom animations
-│   ├── layout.js              # Root layout with FrameTheGallery branding
-│   └── page.js                # Main page with hero section
-├── public/                    # Static assets
-├── next.config.js             # Next.js configuration
-├── tailwind.config.js         # Tailwind with purple-pink theme
-├── package.json               # Dependencies and scripts
-└── README.md                  # Project documentation
+frame-the-gallery/
+├── public/
+│   └── .well-known/
+│       └── farcaster.json     # Farcaster manifest
+├── index.html                 # Main HTML file
+├── app.js                     # Main application logic
+├── styles.css                 # Styling and animations
+├── vite.config.js            # Vite configuration
+├── package.json              # Dependencies and scripts
+└── README.md                 # This file
 ```
+
+## Key Components
+
+### FrameTheGallery Class
+The main application class that handles:
+- Photo management and rendering
+- User authentication
+- File uploads
+- Modal interactions
+- Farcaster SDK integration
+
+### Photo Management
+- Local storage of uploaded photos
+- Sample photos for demonstration
+- Sorting and filtering capabilities
+- Grid and list view modes
+
+### Farcaster Integration
+- Seamless authentication flow
+- User profile display
+- Photo sharing to Farcaster
+- Context-aware features
+
+## Customization
+
+### Adding New Features
+
+1. **Photo Filters**: Add image filtering capabilities
+2. **Albums**: Organize photos into collections
+3. **Comments**: Add commenting system
+4. **Likes**: Implement photo rating system
+5. **Search**: Add photo search functionality
+
+### Styling
+
+The app uses CSS custom properties for easy theming. Key variables:
+- `--primary-color`: Main brand color
+- `--secondary-color`: Secondary accent color
+- `--background-gradient`: Main background gradient
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. Test thoroughly
+5. Submit a pull request
 
 ## License
 
-MIT License - feel free to use this project for your own portfolio needs.
+MIT License - see LICENSE file for details
+
+## Support
+
+For issues or questions:
+- Create an issue on GitHub
+- Reach out on Farcaster (@pirosb3, @linda, @deodad)
+
+## Acknowledgments
+
+- Built with the Farcaster Mini App SDK
+- Uses Unsplash for sample photos
+- Inspired by the Farcaster community
+
+---
+
+**FrameTheGallery** - Bringing beautiful photo sharing to the Farcaster ecosystem! 🖼️✨

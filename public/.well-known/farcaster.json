@@ -1,0 +1,20 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEyMzQ1LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4MjNkODVhMDkzMjYxZjU5MjcwODA0QTZFQTY5N0NlQTRDZUJFY2FmRSJ9",
+    "payload": "eyJkb21haW4iOiJmcmFtZS10aGUtZ2FsbGVyeS52ZXJjZWwuYXBwIn0",
+    "signature": "MHgwZmJiYWIwODg3YTU2MDFiNDU3MzVkOTQ5MDRjM2Y1NGUxMzVhZTQxOGEzMWQ5ODNhODAzZmZlYWNlZWMyZDYzNWY4ZTFjYWU4M2NhNTAwOTMzM2FmMTc1NDlmMDY2YTVlOWUwNTljNmZiNDUxMzg0Njk1NzBhODNiNjcyZWJjZTFi"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "FrameTheGallery",
+    "iconUrl": "https://frame-the-gallery.vercel.app/icon.svg",
+    "homeUrl": "https://frame-the-gallery.vercel.app/",
+    "imageUrl": "https://frame-the-gallery.vercel.app/splash.svg",
+    "buttonTitle": "🖼️ View Gallery",
+    "splashImageUrl": "https://frame-the-gallery.vercel.app/splash.svg",
+    "splashBackgroundColor": "#667eea",
+    "description": "A beautiful photo gallery for the Farcaster community. Upload, view, and share your favorite photos with fellow Farcaster users.",
+    "category": "social",
+    "tags": ["photos", "gallery", "social", "sharing"]
+  }
+}

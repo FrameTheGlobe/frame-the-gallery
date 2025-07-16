@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrameTheGallery - Photo Gallery</title>
+    
+    <!-- Farcaster Mini App Meta Tags -->
+    <meta property="fc:frame" content="vNext" />
+    <meta property="fc:frame:image" content="https://frame-the-gallery.vercel.app/splash.svg" />
+    <meta property="fc:frame:button:1" content="🖼️ View Gallery" />
+    <meta property="fc:frame:button:1:action" content="link" />
+    <meta property="fc:frame:button:1:target" content="https://frame-the-gallery.vercel.app" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="FrameTheGallery" />
+    <meta property="og:description" content="A beautiful photo gallery for the Farcaster community" />
+    <meta property="og:image" content="https://frame-the-gallery.vercel.app/splash.svg" />
+    <meta property="og:type" content="website" />
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-logo">🖼️</div>
+                <h2>FrameTheGallery</h2>
+                <div class="loading-spinner"></div>
+                <p>Loading your photo gallery...</p>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="main-app hidden">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo">
+                        <span class="logo-icon">🖼️</span>
+                        <h1>FrameTheGallery</h1>
+                    </div>
+                    <div class="user-info">
+                        <div id="user-profile" class="user-profile hidden">
+                            <img id="user-avatar" class="user-avatar" alt="User Avatar">
+                            <span id="user-name" class="user-name"></span>
+                        </div>
+                        <button id="auth-button" class="auth-button">
+                            Connect Farcaster
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Portfolio Controls -->
+            <div class="portfolio-controls">
+                <div class="controls-left">
+                    <button id="create-portfolio-btn" class="control-btn primary">
+                        ➕ Create Portfolio
+                    </button>
+                    <button id="back-to-portfolios" class="control-btn secondary hidden">
+                        ← Back to Portfolios
+                    </button>
+                </div>
+                <div class="controls-right">
+                    <select id="sort-select" class="sort-select">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="name">By Name</option>
+                    </select>
+                    <div class="view-toggle">
+                        <button id="grid-view" class="view-btn active" title="Grid View">⊞</button>
+                        <button id="list-view" class="view-btn" title="List View">☰</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Creation Modal -->
+            <div id="portfolio-creation-modal" class="modal hidden">
+                <div class="modal-backdrop"></div>
+                <div class="modal-content portfolio-creation">
+                    <button class="modal-close">&times;</button>
+                    <h2>Create New Portfolio</h2>
+                    <form id="portfolio-form">
+                        <div class="form-group">
+                            <label for="portfolio-title">Portfolio Title</label>
+                            <input type="text" id="portfolio-title" placeholder="e.g., Summer Adventures" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="portfolio-description">Description</label>
+                            <textarea id="portfolio-description" placeholder="Describe your photo collection..." rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="portfolio-photos">Upload Photos (Max 10)</label>
+                            <div class="upload-area" id="upload-area">
+                                <div class="upload-placeholder">
+                                    <div class="upload-icon">📸</div>
+                                    <p>Drag & drop photos here or click to browse</p>
+                                    <p class="upload-limit">Maximum 10 photos per portfolio</p>
+                                </div>
+                                <input type="file" id="portfolio-file-input" accept="image/*" multiple style="display: none;">
+                            </div>
+                            <div id="photo-preview-grid" class="photo-preview-grid hidden"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn secondary" id="cancel-portfolio">Cancel</button>
+                            <button type="submit" class="btn primary" id="create-portfolio">Create Portfolio</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="gallery-container">
+                <!-- Portfolio Grid View -->
+                <div id="portfolio-grid" class="portfolio-grid">
+                    <!-- Portfolio cards will be loaded here -->
+                </div>
+                
+                <!-- Individual Portfolio View -->
+                <div id="portfolio-detail" class="portfolio-detail hidden">
+                    <div class="portfolio-header">
+                        <h2 id="portfolio-detail-title"></h2>
+                        <p id="portfolio-detail-description"></p>
+                        <div class="portfolio-meta">
+                            <span id="portfolio-detail-author"></span>
+                            <span id="portfolio-detail-date"></span>
+                            <span id="portfolio-photo-count"></span>
+                        </div>
+                    </div>
+                    <div id="portfolio-photos" class="photo-grid">
+                        <!-- Portfolio photos will be loaded here -->
+                    </div>
+                </div>
+                
+                <div id="empty-state" class="empty-state">
+                    <div class="empty-content">
+                        <div class="empty-icon">🖼️</div>
+                        <h3>No portfolios yet</h3>
+                        <p>Create your first photo portfolio to get started!</p>
+                        <button class="empty-create-btn">➕ Create Portfolio</button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Photo Modal -->
+            <div id="photo-modal" class="modal hidden">
+                <div class="modal-backdrop"></div>
+                <div class="modal-content">
+                    <button class="modal-close">&times;</button>
+                    <img id="modal-image" class="modal-image" alt="Full size photo">
+                    <div class="modal-info">
+                        <h3 id="modal-title" class="modal-title"></h3>
+                        <p id="modal-date" class="modal-date"></p>
+                        <div class="modal-actions">
+                            <button id="share-btn" class="modal-btn">🔗 Share</button>
+                            <button id="download-btn" class="modal-btn">⬇️ Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
