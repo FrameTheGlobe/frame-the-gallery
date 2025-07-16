@@ -368,7 +368,9 @@ class ProfessionalPortfolio {
     }
 
     showCreatePortfolioModal() {
+        console.log('showCreatePortfolioModal called');
         const modal = document.getElementById('create-portfolio-modal');
+        console.log('Modal element:', modal);
         if (!modal) {
             // Create modal if it doesn't exist
             document.body.insertAdjacentHTML('beforeend', `
@@ -728,7 +730,22 @@ class ProfessionalPortfolio {
 // Make portfolio globally accessible for onclick handlers
 let portfolio;
 
+// Test function to verify portfolio is accessible
+window.testPortfolio = function() {
+    console.log('Portfolio object:', portfolio);
+    if (portfolio && portfolio.showCreatePortfolioModal) {
+        console.log('showCreatePortfolioModal method exists');
+        portfolio.showCreatePortfolioModal();
+    } else {
+        console.error('Portfolio not initialized or method missing');
+    }
+};
+
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing portfolio...');
     portfolio = new ProfessionalPortfolio();
+    console.log('Portfolio initialized:', portfolio);
+    // Make it globally accessible
+    window.portfolio = portfolio;
 });
