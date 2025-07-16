@@ -32,7 +32,7 @@
                 <div class="loading-logo">📸</div>
                 <h2>FrameTheGallery</h2>
                 <div class="loading-spinner"></div>
-                <p>Preparing your portfolio...</p>
+                <p>Preparing your portfolios...</p>
             </div>
         </div>
 
@@ -63,19 +63,29 @@
             <main class="container">
                 <!-- Portfolio Header -->
                 <section class="portfolio-header">
-                    <h1 class="portfolio-title" id="portfolio-title">Your Photography Portfolio</h1>
+                    <div id="back-button" class="back-button" style="display: none;">
+                        <button class="btn btn-secondary" onclick="portfolio.showPortfoliosView()">
+                            ← Back to Portfolios
+                        </button>
+                    </div>
+                    <h1 class="portfolio-title" id="portfolio-title">Your Photography Portfolios</h1>
                     <p class="portfolio-subtitle" id="portfolio-subtitle">
-                        Showcase your photojournalism work with up to 10 carefully curated images that tell your story.
+                        Create up to 10 portfolios with 10 photos each to showcase your photojournalism work.
                     </p>
                     <div class="portfolio-meta">
-                        <span id="photo-count">0 photos</span>
+                        <span>0 of 10 portfolios</span>
                         <span>•</span>
-                        <span id="last-updated">Never updated</span>
+                        <span>0 total photos</span>
                     </div>
                 </section>
 
-                <!-- Upload Section -->
-                <section class="upload-section" id="upload-section">
+                <!-- Portfolio Grid Section (for portfolios overview) -->
+                <section id="portfolio-grid-section" class="portfolio-grid-section">
+                    <!-- Portfolio cards will be dynamically loaded here -->
+                </section>
+
+                <!-- Upload Section (for individual portfolio) -->
+                <section class="upload-section" id="upload-section" style="display: none;">
                     <div class="upload-area" id="upload-area">
                         <div class="upload-icon">📁</div>
                         <div class="upload-text">Drop your photos here or click to browse</div>
@@ -84,12 +94,15 @@
                     </div>
                 </section>
 
-                <!-- Controls -->
+                <!-- Controls (for individual portfolio) -->
                 <section class="controls" id="controls" style="display: none;">
                     <div class="photo-count" id="photo-counter">0 of 10 photos</div>
                     <div class="control-buttons">
+                        <button class="btn btn-secondary" id="edit-portfolio">
+                            ✏️ Edit Portfolio
+                        </button>
                         <button class="btn btn-secondary" id="clear-all">
-                            🗑️ Clear All
+                            🗑️ Clear All Photos
                         </button>
                         <button class="btn" id="share-portfolio">
                             📤 Share Portfolio
@@ -97,16 +110,16 @@
                     </div>
                 </section>
 
-                <!-- Photo Grid -->
-                <section class="photo-grid" id="photo-grid">
+                <!-- Photo Grid (for individual portfolio) -->
+                <section class="photo-grid" id="photo-grid" style="display: none;">
                     <!-- Photos will be dynamically loaded here -->
                 </section>
 
-                <!-- Empty State -->
-                <section class="empty-state" id="empty-state">
+                <!-- Empty State (for individual portfolio) -->
+                <section class="empty-state" id="empty-state" style="display: none;">
                     <div class="empty-state-icon">📸</div>
-                    <h3>Start Your Portfolio</h3>
-                    <p>Upload your first photo to begin showcasing your photojournalism work.<br>
+                    <h3>Start Adding Photos</h3>
+                    <p>Upload your first photo to begin this portfolio.<br>
                     Each portfolio can contain up to 10 images that tell your story.</p>
                 </section>
             </main>
