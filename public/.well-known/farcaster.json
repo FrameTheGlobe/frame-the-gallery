@@ -14,7 +14,18 @@
     "splashImageUrl": "https://framethegallery.xyz/splash.svg",
     "splashBackgroundColor": "#667eea",
     "description": "A beautiful photo gallery for the Farcaster community. Upload, view, and share your favorite photos with fellow Farcaster users.",
+    "subtitle": "Portfolio-style photo galleries",
+    "tagline": "Create beautiful photo portfolios",
+    "primaryCategory": "social",
     "category": "social",
-    "tags": ["photos", "gallery", "social", "sharing"]
+    "tags": ["photos", "gallery", "social", "sharing", "portfolio", "photography"],
+    "heroImageUrl": "https://framethegallery.xyz/og-image.png",
+    "ogTitle": "FrameTheGallery - Photo Portfolio Gallery",
+    "ogDescription": "Create beautiful photo portfolios and share them with the Farcaster community. Upload up to 10 photos per portfolio with drag & drop.",
+    "ogImageUrl": "https://framethegallery.xyz/og-image.png",
+    "requiredCapabilities": [
+      "actions.signIn",
+      "actions.composeCast"
+    ]
   }
 }
