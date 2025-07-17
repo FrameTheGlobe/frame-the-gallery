@@ -522,13 +522,7 @@ class ProfessionalPortfolio {
         console.log('Upload zone found:', !!uploadZone);
         
         if (fileInput && uploadZone) {
-            // Click to upload
-            this.uploadZoneClickHandler = (e) => {
-                e.preventDefault();
-                console.log('Upload zone clicked');
-                fileInput.click();
-            };
-            uploadZone.addEventListener('click', this.uploadZoneClickHandler);
+            console.log('Setting up file input and upload zone');
             
             // File selection
             this.fileInputChangeHandler = (e) => {
@@ -594,7 +588,6 @@ class ProfessionalPortfolio {
             fileInput.removeEventListener('change', this.fileInputChangeHandler);
         }
         if (uploadZone) {
-            if (this.uploadZoneClickHandler) uploadZone.removeEventListener('click', this.uploadZoneClickHandler);
             if (this.dragOverHandler) uploadZone.removeEventListener('dragover', this.dragOverHandler);
             if (this.dragLeaveHandler) uploadZone.removeEventListener('dragleave', this.dragLeaveHandler);
             if (this.dropHandler) uploadZone.removeEventListener('drop', this.dropHandler);
