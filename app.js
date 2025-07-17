@@ -311,7 +311,7 @@ class ProfessionalPortfolio {
                     <h3>Create Your First Portfolio</h3>
                     <p>Start showcasing your photojournalism work by creating your first portfolio.<br>
                     Each portfolio can tell a unique story with up to ${this.maxPhotosPerPortfolio} images.</p>
-                    <button class=\"btn\" onclick=\"portfolio.showCreatePortfolioModal()\">
+                    <button class=\"btn\" onclick=\"window.portfolio.showCreatePortfolioModal()">
                         ➕ Create Portfolio
                     </button>
                 </div>
@@ -323,7 +323,7 @@ class ProfessionalPortfolio {
                     <div class=\"portfolio-stats\">
                         ${this.portfolios.length} of ${this.maxPortfolios} portfolios • ${this.getTotalPhotoCount()} total photos
                     </div>
-                    ${canCreateMore ? `<button class=\"btn\" onclick=\"portfolio.showCreatePortfolioModal()\">➕ Create Portfolio</button>` : '<span class=\"limit-reached\">Portfolio limit reached</span>'}
+                    ${canCreateMore ? `<button class=\"btn\" onclick=\"window.portfolio.showCreatePortfolioModal()">➕ Create Portfolio</button>` : '<span class=\"limit-reached\">Portfolio limit reached</span>'}
                 </div>
                 <div class=\"portfolio-grid\">
                     ${this.portfolios.map(p => this.renderPortfolioCard(p)).join('')}
@@ -337,27 +337,27 @@ class ProfessionalPortfolio {
         const photoCount = portfolio.photos.length;
         
         return `
-            <div class=\"portfolio-card\" onclick=\"portfolio.openPortfolio('${portfolio.id}')\">
-                <div class=\"portfolio-cover\">
+            <div class="portfolio-card" onclick="window.portfolio.openPortfolio('${portfolio.id}')">
+                <div class="portfolio-cover">
                     ${coverPhoto ? 
-                        `<img src=\"${coverPhoto.src}\" alt=\"${portfolio.title}\" loading=\"lazy\">` :
-                        `<div class=\"portfolio-placeholder\">📸</div>`
+                        `<img src="${coverPhoto.src}" alt="${portfolio.title}" loading="lazy">` :
+                        `<div class="portfolio-placeholder">📸</div>`
                     }
-                    <div class=\"portfolio-overlay\">
-                        <div class=\"portfolio-actions\">
-                            <button class=\"portfolio-action\" onclick=\"event.stopPropagation(); portfolio.editPortfolio('${portfolio.id}')\" title=\"Edit\">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-actions">
+                            <button class="portfolio-action" onclick="window.portfolio.editPortfolio('${portfolio.id}')" title="Edit">
                                 ✏️
                             </button>
-                            <button class=\"portfolio-action\" onclick=\"event.stopPropagation(); portfolio.deletePortfolio('${portfolio.id}')\" title=\"Delete\">
+                            <button class="portfolio-action" onclick="window.portfolio.deletePortfolio('${portfolio.id}')" title="Delete">
                                 🗑️
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class=\"portfolio-info\">
-                    <h3 class=\"portfolio-card-title\">${portfolio.title}</h3>
-                    <p class=\"portfolio-card-description\">${portfolio.description || 'No description'}</p>
-                    <div class=\"portfolio-card-meta\">
+                <div class="portfolio-info">
+                    <h3 class="portfolio-card-title">${portfolio.title}</h3>
+                    <p class="portfolio-card-description">${portfolio.description || 'No description'}</p>
+                    <div class="portfolio-card-meta">
                         <span>${photoCount} photo${photoCount !== 1 ? 's' : ''}</span>
                         <span>•</span>
                         <span>${this.formatDate(new Date(portfolio.updatedAt))}</span>
@@ -374,25 +374,25 @@ class ProfessionalPortfolio {
         if (!modal) {
             // Create modal if it doesn't exist
             document.body.insertAdjacentHTML('beforeend', `
-                <div id=\"create-portfolio-modal\" class=\"modal active\">
-                    <div class=\"modal-content\" style=\"max-width: 500px; padding: 2rem;\">
-                        <h2 style=\"margin-bottom: 1.5rem;\">Create New Portfolio</h2>
-                        <form id=\"create-portfolio-form\">
-                            <div class=\"form-group\" style=\"margin-bottom: 1rem;\">
-                                <label for=\"portfolio-title\" style=\"display: block; margin-bottom: 0.5rem; font-weight: 500;\">Title *</label>
-                                <input type=\"text\" id=\"portfolio-title\" required maxlength=\"50\" 
-                                       style=\"width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;\"
-                                       placeholder=\"e.g., Urban Landscapes, Breaking News, etc.\">
+                <div id="create-portfolio-modal" class="modal active">
+                    <div class="modal-content" style="max-width: 500px; padding: 2rem;">
+                        <h2 style="margin-bottom: 1.5rem;">Create New Portfolio</h2>
+                        <form id="create-portfolio-form">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="portfolio-title" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Title *</label>
+                                <input type="text" id="portfolio-title" required maxlength="50" 
+                                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
+                                       placeholder="e.g., Urban Landscapes, Breaking News, etc.">
                             </div>
-                            <div class=\"form-group\" style=\"margin-bottom: 1.5rem;\">
-                                <label for=\"portfolio-description\" style=\"display: block; margin-bottom: 0.5rem; font-weight: 500;\">Description</label>
-                                <textarea id=\"portfolio-description\" rows=\"3\" maxlength=\"200\"
-                                          style=\"width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; resize: vertical;\"
-                                          placeholder=\"Tell the story behind this portfolio...\"></textarea>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label for="portfolio-description" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description</label>
+                                <textarea id="portfolio-description" rows="3" maxlength="200"
+                                          style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; resize: vertical;"
+                                          placeholder="Tell the story behind this portfolio..."></textarea>
                             </div>
-                            <div class=\"form-actions\" style=\"display: flex; gap: 1rem; justify-content: flex-end;\">
-                                <button type=\"button\" class=\"btn btn-secondary\" onclick=\"portfolio.hideCreatePortfolioModal()\">Cancel</button>
-                                <button type=\"submit\" class=\"btn\">Create Portfolio</button>
+                            <div class="form-actions" style="display: flex; gap: 1rem; justify-content: flex-end;">
+                                <button type="button" class="btn btn-secondary" onclick="window.portfolio.hideCreatePortfolioModal()">Cancel</button>
+                                <button type="submit" class="btn">Create Portfolio</button>
                             </div>
                         </form>
                     </div>
@@ -402,7 +402,7 @@ class ProfessionalPortfolio {
             // Add form submit listener
             document.getElementById('create-portfolio-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.createNewPortfolio();
+                window.portfolio.createNewPortfolio();
             });
         } else {
             modal.classList.add('active');
@@ -479,7 +479,7 @@ class ProfessionalPortfolio {
         const portfolio = this.portfolios.find(p => p.id === portfolioId);
         if (!portfolio) return;
 
-        if (confirm(`Delete \"${portfolio.title}\" portfolio? This will permanently remove all ${portfolio.photos.length} photos.`)) {
+        if (confirm(`Delete "${portfolio.title}" portfolio? This will permanently remove all ${portfolio.photos.length} photos.`)) {
             this.portfolios = this.portfolios.filter(p => p.id !== portfolioId);
             this.saveUserPortfolios();
             
@@ -537,14 +537,14 @@ class ProfessionalPortfolio {
         } else {
             photoGrid.style.display = 'grid';
             photoGrid.innerHTML = this.currentPortfolio.photos.map((photo, index) => `
-                <div class=\"photo-item\" data-index=\"${index}\">
-                    <img src=\"${photo.src}\" alt=\"${photo.name}\" loading=\"lazy\">
-                    <div class=\"photo-overlay\">
-                        <div class=\"photo-actions\">
-                            <button class=\"photo-action\" onclick=\"portfolio.viewPhoto(${index})\" title=\"View\">
+                <div class="photo-item" data-index="${index}">
+                    <img src="${photo.src}" alt="${photo.name}" loading="lazy">
+                    <div class="photo-overlay">
+                        <div class="photo-actions">
+                            <button class="photo-action" onclick="window.portfolio.viewPhoto(${index})" title="View">
                                 👁️
                             </button>
-                            <button class=\"photo-action\" onclick=\"portfolio.removePhoto(${index})\" title=\"Remove\">
+                            <button class="photo-action" onclick="window.portfolio.removePhoto(${index})" title="Remove">
                                 🗑️
                             </button>
                         </div>
