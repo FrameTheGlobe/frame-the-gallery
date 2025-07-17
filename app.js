@@ -426,78 +426,151 @@ class ProfessionalPortfolio {
     }
     
     setupModalEventListeners() {
+        console.log('Setting up modal event listeners');
+        
+        // Remove existing listeners to prevent duplicates
+        this.removeModalEventListeners();
+        
         // Close button
         const closeBtn = document.getElementById('portfolio-modal-close');
         if (closeBtn) {
-            closeBtn.onclick = () => this.hideCreatePortfolioModal();
+            this.modalCloseHandler = () => this.hideCreatePortfolioModal();
+            closeBtn.addEventListener('click', this.modalCloseHandler);
         }
         
         // Cancel button
         const cancelBtn = document.getElementById('cancel-portfolio');
         if (cancelBtn) {
-            cancelBtn.onclick = () => this.hideCreatePortfolioModal();
+            this.modalCancelHandler = () => this.hideCreatePortfolioModal();
+            cancelBtn.addEventListener('click', this.modalCancelHandler);
         }
         
         // Form submission
         const form = document.getElementById('portfolio-creation-form');
         if (form) {
-            form.onsubmit = (e) => {
+            this.modalFormHandler = (e) => {
                 e.preventDefault();
                 this.createNewPortfolioFromModal();
             };
+            form.addEventListener('submit', this.modalFormHandler);
         }
         
-        // File input
+        // File input and upload zone
         const fileInput = document.getElementById('modal-file-input');
         const uploadZone = document.getElementById('modal-upload-zone');
         
+        console.log('File input found:', !!fileInput);
+        console.log('Upload zone found:', !!uploadZone);
+        
         if (fileInput && uploadZone) {
             // Click to upload
-            uploadZone.onclick = () => fileInput.click();
+            this.uploadZoneClickHandler = (e) => {
+                e.preventDefault();
+                console.log('Upload zone clicked');
+                fileInput.click();
+            };
+            uploadZone.addEventListener('click', this.uploadZoneClickHandler);
             
             // File selection
-            fileInput.onchange = (e) => this.handleFileSelection(e.target.files);
+            this.fileInputChangeHandler = (e) => {
+                console.log('Files selected:', e.target.files.length);
+                this.handleFileSelection(e.target.files);
+            };
+            fileInput.addEventListener('change', this.fileInputChangeHandler);
             
             // Drag and drop
-            uploadZone.ondragover = (e) => {
+            this.dragOverHandler = (e) => {
                 e.preventDefault();
                 uploadZone.classList.add('dragover');
             };
             
-            uploadZone.ondragleave = () => {
+            this.dragLeaveHandler = () => {
                 uploadZone.classList.remove('dragover');
             };
             
-            uploadZone.ondrop = (e) => {
+            this.dropHandler = (e) => {
                 e.preventDefault();
                 uploadZone.classList.remove('dragover');
+                console.log('Files dropped:', e.dataTransfer.files.length);
                 this.handleFileSelection(e.dataTransfer.files);
             };
+            
+            uploadZone.addEventListener('dragover', this.dragOverHandler);
+            uploadZone.addEventListener('dragleave', this.dragLeaveHandler);
+            uploadZone.addEventListener('drop', this.dropHandler);
+        } else {
+            console.error('File input or upload zone not found!');
         }
         
         // Close on backdrop click
         const modal = document.getElementById('portfolio-creation-modal');
         if (modal) {
-            modal.onclick = (e) => {
+            this.modalBackdropHandler = (e) => {
                 if (e.target === modal) {
                     this.hideCreatePortfolioModal();
                 }
             };
+            modal.addEventListener('click', this.modalBackdropHandler);
+        }
+    }
+    
+    removeModalEventListeners() {
+        const closeBtn = document.getElementById('portfolio-modal-close');
+        const cancelBtn = document.getElementById('cancel-portfolio');
+        const form = document.getElementById('portfolio-creation-form');
+        const fileInput = document.getElementById('modal-file-input');
+        const uploadZone = document.getElementById('modal-upload-zone');
+        const modal = document.getElementById('portfolio-creation-modal');
+        
+        if (closeBtn && this.modalCloseHandler) {
+            closeBtn.removeEventListener('click', this.modalCloseHandler);
+        }
+        if (cancelBtn && this.modalCancelHandler) {
+            cancelBtn.removeEventListener('click', this.modalCancelHandler);
+        }
+        if (form && this.modalFormHandler) {
+            form.removeEventListener('submit', this.modalFormHandler);
+        }
+        if (fileInput && this.fileInputChangeHandler) {
+            fileInput.removeEventListener('change', this.fileInputChangeHandler);
+        }
+        if (uploadZone) {
+            if (this.uploadZoneClickHandler) uploadZone.removeEventListener('click', this.uploadZoneClickHandler);
+            if (this.dragOverHandler) uploadZone.removeEventListener('dragover', this.dragOverHandler);
+            if (this.dragLeaveHandler) uploadZone.removeEventListener('dragleave', this.dragLeaveHandler);
+            if (this.dropHandler) uploadZone.removeEventListener('drop', this.dropHandler);
+        }
+        if (modal && this.modalBackdropHandler) {
+            modal.removeEventListener('click', this.modalBackdropHandler);
         }
     }
 
     handleFileSelection(files) {
-        if (!files || files.length === 0) return;
+        console.log('handleFileSelection called with:', files);
+        
+        if (!files || files.length === 0) {
+            console.log('No files provided');
+            return;
+        }
+        
+        console.log('Number of files:', files.length);
         
         const maxFiles = 10;
         const maxFileSize = 10 * 1024 * 1024; // 10MB
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
         
         // Initialize tempPhotos if not exists
-        if (!this.tempPhotos) this.tempPhotos = [];
+        if (!this.tempPhotos) {
+            console.log('Initializing tempPhotos array');
+            this.tempPhotos = [];
+        }
+        
+        console.log('Current tempPhotos length:', this.tempPhotos.length);
         
         const remainingSlots = maxFiles - this.tempPhotos.length;
         const filesToProcess = Array.from(files).slice(0, remainingSlots);
+        
+        console.log('Files to process:', filesToProcess.length);
         
         filesToProcess.forEach(file => {
             // Validate file type
@@ -513,8 +586,11 @@ class ProfessionalPortfolio {
             }
             
             // Read file and create preview
+            console.log('Reading file:', file.name, 'Size:', file.size, 'Type:', file.type);
             const reader = new FileReader();
+            
             reader.onload = (e) => {
+                console.log('File read successfully:', file.name);
                 const photoData = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                     data: e.target.result,
@@ -523,9 +599,16 @@ class ProfessionalPortfolio {
                     type: file.type
                 };
                 
+                console.log('Adding photo to tempPhotos:', photoData.name);
                 this.tempPhotos.push(photoData);
+                console.log('tempPhotos length after push:', this.tempPhotos.length);
                 this.updatePhotoPreviewGrid();
             };
+            
+            reader.onerror = (e) => {
+                console.error('Error reading file:', file.name, e);
+            };
+            
             reader.readAsDataURL(file);
         });
         
@@ -535,23 +618,43 @@ class ProfessionalPortfolio {
     }
     
     updatePhotoPreviewGrid() {
+        console.log('updatePhotoPreviewGrid called, tempPhotos length:', this.tempPhotos.length);
+        
         const previewGrid = document.getElementById('photo-preview-grid');
-        if (!previewGrid) return;
+        if (!previewGrid) {
+            console.error('Photo preview grid element not found!');
+            return;
+        }
+        
+        console.log('Preview grid element found');
         
         if (this.tempPhotos.length === 0) {
+            console.log('No photos to display, hiding grid');
             previewGrid.style.display = 'none';
             return;
         }
         
+        console.log('Showing grid with', this.tempPhotos.length, 'photos');
         previewGrid.style.display = 'grid';
         previewGrid.innerHTML = this.tempPhotos.map(photo => `
             <div class="photo-preview-item">
                 <img src="${photo.data}" alt="${photo.name}" class="photo-preview-image">
-                <button class="photo-preview-remove" onclick="window.portfolio.removePreviewPhoto('${photo.id}')" title="Remove photo">
+                <button class="photo-preview-remove" data-photo-id="${photo.id}" title="Remove photo">
                     ×
                 </button>
             </div>
         `).join('');
+        
+        // Add event listeners for remove buttons
+        const removeButtons = previewGrid.querySelectorAll('.photo-preview-remove');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const photoId = button.getAttribute('data-photo-id');
+                console.log('Removing photo:', photoId);
+                this.removePreviewPhoto(photoId);
+            });
+        });
     }
     
     removePreviewPhoto(photoId) {
