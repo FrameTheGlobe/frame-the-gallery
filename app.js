@@ -31,6 +31,9 @@ class ProfessionalPortfolio {
             // Update UI
             this.updateUI();
             
+            // Setup global event listeners
+            this.setupGlobalEventListeners();
+            
             // Hide loading screen and show main app
             setTimeout(() => {
                 document.getElementById('loading-screen').classList.add('hidden');
@@ -77,6 +80,20 @@ class ProfessionalPortfolio {
             localStorage.setItem('portfolio_session_id', sessionId);
         }
         return sessionId;
+    }
+    
+    setupGlobalEventListeners() {
+        console.log('Setting up global event listeners');
+        
+        // Back to portfolios button
+        const backButton = document.getElementById('back-to-portfolios-btn');
+        if (backButton) {
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Back button clicked');
+                this.showPortfoliosView();
+            });
+        }
     }
 
     updateUserInfo() {
@@ -307,12 +324,12 @@ class ProfessionalPortfolio {
 
         if (this.portfolios.length === 0) {
             portfolioGridSection.innerHTML = `
-                <div class=\"empty-state\">
-                    <div class=\"empty-state-icon\">📁</div>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📁</div>
                     <h3>Create Your First Portfolio</h3>
                     <p>Start showcasing your photojournalism work by creating your first portfolio.<br>
                     Each portfolio can tell a unique story with up to ${this.maxPhotosPerPortfolio} images.</p>
-                    <button class=\"btn\" onclick=\"window.portfolio.showCreatePortfolioModal()">
+                    <button class="btn create-portfolio-btn" data-action="create-portfolio">
                         ➕ Create Portfolio
                     </button>
                 </div>
@@ -320,17 +337,59 @@ class ProfessionalPortfolio {
         } else {
             const canCreateMore = this.portfolios.length < this.maxPortfolios;
             portfolioGridSection.innerHTML = `
-                <div class=\"portfolio-controls\">
-                    <div class=\"portfolio-stats\">
+                <div class="portfolio-controls">
+                    <div class="portfolio-stats">
                         ${this.portfolios.length} of ${this.maxPortfolios} portfolios • ${this.getTotalPhotoCount()} total photos
                     </div>
-                    ${canCreateMore ? `<button class=\"btn\" onclick=\"window.portfolio.showCreatePortfolioModal()">➕ Create Portfolio</button>` : '<span class=\"limit-reached\">Portfolio limit reached</span>'}
+                    ${canCreateMore ? `<button class="btn create-portfolio-btn" data-action="create-portfolio">➕ Create Portfolio</button>` : '<span class="limit-reached">Portfolio limit reached</span>'}
                 </div>
-                <div class=\"portfolio-grid\">
+                <div class="portfolio-grid">
                     ${this.portfolios.map(p => this.renderPortfolioCard(p)).join('')}
                 </div>
             `;
         }
+        
+        // Add event delegation for Create Portfolio buttons
+        const createButtons = document.querySelectorAll('.create-portfolio-btn');
+        createButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Create Portfolio button clicked');
+                this.showCreatePortfolioModal();
+            });
+        });
+        
+        // Add event delegation for portfolio cards
+        const portfolioCards = document.querySelectorAll('.portfolio-card');
+        portfolioCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Don't trigger if clicking on action buttons
+                if (e.target.closest('.portfolio-action')) {
+                    return;
+                }
+                const portfolioId = card.getAttribute('data-portfolio-id');
+                console.log('Opening portfolio:', portfolioId);
+                this.openPortfolio(portfolioId);
+            });
+        });
+        
+        // Add event delegation for portfolio action buttons
+        const actionButtons = document.querySelectorAll('.portfolio-action');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent card click
+                const portfolioId = button.getAttribute('data-portfolio-id');
+                const action = button.getAttribute('data-action');
+                console.log('Portfolio action:', action, 'for portfolio:', portfolioId);
+                
+                if (action === 'edit-portfolio') {
+                    this.editPortfolio(portfolioId);
+                } else if (action === 'delete-portfolio') {
+                    this.deletePortfolio(portfolioId);
+                }
+            });
+        });
     }
 
     renderPortfolioCard(portfolio) {
@@ -338,7 +397,7 @@ class ProfessionalPortfolio {
         const photoCount = portfolio.photos.length;
         
         return `
-            <div class="portfolio-card" onclick="window.portfolio.openPortfolio('${portfolio.id}')">
+            <div class="portfolio-card" data-portfolio-id="${portfolio.id}" data-action="open-portfolio">
                 <div class="portfolio-cover">
                     ${coverPhoto ? 
                         `<img src="${coverPhoto.src}" alt="${portfolio.title}" loading="lazy">` :
@@ -346,10 +405,10 @@ class ProfessionalPortfolio {
                     }
                     <div class="portfolio-overlay">
                         <div class="portfolio-actions">
-                            <button class="portfolio-action" onclick="window.portfolio.editPortfolio('${portfolio.id}')" title="Edit">
+                            <button class="portfolio-action" data-portfolio-id="${portfolio.id}" data-action="edit-portfolio" title="Edit">
                                 ✏️
                             </button>
-                            <button class="portfolio-action" onclick="window.portfolio.deletePortfolio('${portfolio.id}')" title="Delete">
+                            <button class="portfolio-action" data-portfolio-id="${portfolio.id}" data-action="delete-portfolio" title="Delete">
                                 🗑️
                             </button>
                         </div>
