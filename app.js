@@ -10,6 +10,7 @@ class ProfessionalPortfolio {
         this.maxPhotosPerPortfolio = 10;
         this.currentPhotoIndex = 0;
         this.currentView = 'portfolios'; // 'portfolios' or 'portfolio-detail'
+        this.tempPhotos = []; // For modal photo uploads
         
         this.init();
     }
@@ -369,56 +370,229 @@ class ProfessionalPortfolio {
 
     showCreatePortfolioModal() {
         console.log('showCreatePortfolioModal called');
-        const modal = document.getElementById('create-portfolio-modal');
-        console.log('Modal element:', modal);
+        const modal = document.getElementById('portfolio-creation-modal');
         if (!modal) {
-            // Create modal if it doesn't exist
-            document.body.insertAdjacentHTML('beforeend', `
-                <div id="create-portfolio-modal" class="modal active">
-                    <div class="modal-content" style="max-width: 500px; padding: 2rem;">
-                        <h2 style="margin-bottom: 1.5rem;">Create New Portfolio</h2>
-                        <form id="create-portfolio-form">
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label for="portfolio-title" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Title *</label>
-                                <input type="text" id="portfolio-title" required maxlength="50" 
-                                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
-                                       placeholder="e.g., Urban Landscapes, Breaking News, etc.">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
-                                <label for="portfolio-description" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description</label>
-                                <textarea id="portfolio-description" rows="3" maxlength="200"
-                                          style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; resize: vertical;"
-                                          placeholder="Tell the story behind this portfolio..."></textarea>
-                            </div>
-                            <div class="form-actions" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                                <button type="button" class="btn btn-secondary" onclick="window.portfolio.hideCreatePortfolioModal()">Cancel</button>
-                                <button type="submit" class="btn">Create Portfolio</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `);
-            
-            // Add form submit listener
-            document.getElementById('create-portfolio-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                window.portfolio.createNewPortfolio();
-            });
-        } else {
-            modal.classList.add('active');
+            console.error('Portfolio creation modal not found');
+            return;
         }
+        
+        // Reset form
+        this.resetPortfolioForm();
+        
+        // Show modal
+        modal.classList.add('active');
+        
+        // Setup event listeners
+        this.setupModalEventListeners();
+        
+        // Focus on title input
+        setTimeout(() => {
+            const titleInput = document.getElementById('portfolio-title');
+            if (titleInput) titleInput.focus();
+        }, 100);
     }
 
     hideCreatePortfolioModal() {
-        const modal = document.getElementById('create-portfolio-modal');
+        const modal = document.getElementById('portfolio-creation-modal');
         if (modal) {
             modal.classList.remove('active');
-            // Clear form
-            document.getElementById('portfolio-title').value = '';
-            document.getElementById('portfolio-description').value = '';
+            this.resetPortfolioForm();
+        }
+    }
+    
+    resetPortfolioForm() {
+        // Clear form fields
+        const titleInput = document.getElementById('portfolio-title');
+        const descriptionInput = document.getElementById('portfolio-description');
+        const fileInput = document.getElementById('modal-file-input');
+        const previewGrid = document.getElementById('photo-preview-grid');
+        
+        if (titleInput) titleInput.value = '';
+        if (descriptionInput) descriptionInput.value = '';
+        if (fileInput) fileInput.value = '';
+        if (previewGrid) {
+            previewGrid.innerHTML = '';
+            previewGrid.style.display = 'none';
+        }
+        
+        // Reset upload zone
+        const uploadZone = document.getElementById('modal-upload-zone');
+        if (uploadZone) {
+            uploadZone.classList.remove('dragover');
+        }
+        
+        // Clear temporary photos array
+        this.tempPhotos = [];
+    }
+    
+    setupModalEventListeners() {
+        // Close button
+        const closeBtn = document.getElementById('portfolio-modal-close');
+        if (closeBtn) {
+            closeBtn.onclick = () => this.hideCreatePortfolioModal();
+        }
+        
+        // Cancel button
+        const cancelBtn = document.getElementById('cancel-portfolio');
+        if (cancelBtn) {
+            cancelBtn.onclick = () => this.hideCreatePortfolioModal();
+        }
+        
+        // Form submission
+        const form = document.getElementById('portfolio-creation-form');
+        if (form) {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                this.createNewPortfolioFromModal();
+            };
+        }
+        
+        // File input
+        const fileInput = document.getElementById('modal-file-input');
+        const uploadZone = document.getElementById('modal-upload-zone');
+        
+        if (fileInput && uploadZone) {
+            // Click to upload
+            uploadZone.onclick = () => fileInput.click();
+            
+            // File selection
+            fileInput.onchange = (e) => this.handleFileSelection(e.target.files);
+            
+            // Drag and drop
+            uploadZone.ondragover = (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            };
+            
+            uploadZone.ondragleave = () => {
+                uploadZone.classList.remove('dragover');
+            };
+            
+            uploadZone.ondrop = (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                this.handleFileSelection(e.dataTransfer.files);
+            };
+        }
+        
+        // Close on backdrop click
+        const modal = document.getElementById('portfolio-creation-modal');
+        if (modal) {
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    this.hideCreatePortfolioModal();
+                }
+            };
         }
     }
 
+    handleFileSelection(files) {
+        if (!files || files.length === 0) return;
+        
+        const maxFiles = 10;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        
+        // Initialize tempPhotos if not exists
+        if (!this.tempPhotos) this.tempPhotos = [];
+        
+        const remainingSlots = maxFiles - this.tempPhotos.length;
+        const filesToProcess = Array.from(files).slice(0, remainingSlots);
+        
+        filesToProcess.forEach(file => {
+            // Validate file type
+            if (!allowedTypes.includes(file.type)) {
+                alert(`${file.name} is not a supported image format. Please use JPG, PNG, or WebP.`);
+                return;
+            }
+            
+            // Validate file size
+            if (file.size > maxFileSize) {
+                alert(`${file.name} is too large. Maximum file size is 10MB.`);
+                return;
+            }
+            
+            // Read file and create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photoData = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    data: e.target.result,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                };
+                
+                this.tempPhotos.push(photoData);
+                this.updatePhotoPreviewGrid();
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        if (filesToProcess.length < files.length) {
+            alert(`Only ${filesToProcess.length} photos were added. Portfolio limit is ${maxFiles} photos.`);
+        }
+    }
+    
+    updatePhotoPreviewGrid() {
+        const previewGrid = document.getElementById('photo-preview-grid');
+        if (!previewGrid) return;
+        
+        if (this.tempPhotos.length === 0) {
+            previewGrid.style.display = 'none';
+            return;
+        }
+        
+        previewGrid.style.display = 'grid';
+        previewGrid.innerHTML = this.tempPhotos.map(photo => `
+            <div class="photo-preview-item">
+                <img src="${photo.data}" alt="${photo.name}" class="photo-preview-image">
+                <button class="photo-preview-remove" onclick="window.portfolio.removePreviewPhoto('${photo.id}')" title="Remove photo">
+                    ×
+                </button>
+            </div>
+        `).join('');
+    }
+    
+    removePreviewPhoto(photoId) {
+        if (!this.tempPhotos) return;
+        
+        this.tempPhotos = this.tempPhotos.filter(photo => photo.id !== photoId);
+        this.updatePhotoPreviewGrid();
+    }
+    
+    createNewPortfolioFromModal() {
+        const title = document.getElementById('portfolio-title').value.trim();
+        const description = document.getElementById('portfolio-description').value.trim();
+        
+        if (!title) {
+            alert('Please enter a portfolio title');
+            return;
+        }
+        
+        if (this.portfolios.length >= this.maxPortfolios) {
+            alert(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`);
+            return;
+        }
+        
+        const newPortfolio = {
+            id: Date.now().toString(),
+            title: title,
+            description: description,
+            photos: this.tempPhotos ? [...this.tempPhotos] : [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        this.portfolios.push(newPortfolio);
+        this.savePortfolios();
+        this.hideCreatePortfolioModal();
+        this.renderPortfolios();
+        
+        // Show success message
+        alert(`Portfolio "${title}" created successfully!`);
+    }
+    
     createNewPortfolio() {
         const title = document.getElementById('portfolio-title').value.trim();
         const description = document.getElementById('portfolio-description').value.trim();

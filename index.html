@@ -134,6 +134,79 @@
                 <img id="modal-image" class="modal-image" alt="Portfolio Photo">
             </div>
         </div>
+
+        <!-- Portfolio Creation Modal -->
+        <div id="portfolio-creation-modal" class="modal portfolio-modal">
+            <div class="modal-content portfolio-modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">📸 Create New Portfolio</h2>
+                    <button class="modal-close" id="portfolio-modal-close">×</button>
+                </div>
+                
+                <div class="modal-body">
+                    <form id="portfolio-creation-form" class="portfolio-form">
+                        <!-- Portfolio Info Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Portfolio Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="portfolio-title" class="form-label">Portfolio Title *</label>
+                                <input 
+                                    type="text" 
+                                    id="portfolio-title" 
+                                    class="form-input" 
+                                    placeholder="e.g., Urban Landscapes, Street Photography, Nature Collection"
+                                    required
+                                    maxlength="100"
+                                >
+                                <div class="form-hint">Give your portfolio a descriptive title (max 100 characters)</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="portfolio-description" class="form-label">Portfolio Description</label>
+                                <textarea 
+                                    id="portfolio-description" 
+                                    class="form-textarea" 
+                                    placeholder="Tell the story behind this portfolio... What inspired these photos? What themes or emotions do they capture?"
+                                    rows="4"
+                                    maxlength="500"
+                                ></textarea>
+                                <div class="form-hint">Optional description to provide context (max 500 characters)</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Upload Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Add Photos</h3>
+                            
+                            <div class="upload-zone" id="modal-upload-zone">
+                                <div class="upload-zone-content">
+                                    <div class="upload-icon">📁</div>
+                                    <div class="upload-text">Drop photos here or click to browse</div>
+                                    <div class="upload-hint">JPG, PNG, WebP • Up to 10MB each • Maximum 10 photos</div>
+                                    <input type="file" id="modal-file-input" multiple accept="image/*" style="display: none;">
+                                </div>
+                            </div>
+                            
+                            <!-- Photo Preview Grid -->
+                            <div id="photo-preview-grid" class="photo-preview-grid" style="display: none;">
+                                <!-- Photo previews will be added here -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-portfolio">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="create-portfolio-btn" form="portfolio-creation-form">
+                            <span class="btn-icon">✨</span>
+                            Create Portfolio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="app.js"></script>
