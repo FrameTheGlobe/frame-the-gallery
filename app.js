@@ -235,14 +235,28 @@ class ProfessionalPortfolio {
             console.log('- Storage key:', storageKey);
             console.log('- Number of portfolios:', this.portfolios.length);
             console.log('- Data size:', portfolioData.length, 'characters');
+            console.log('- Data size (MB):', Math.round(portfolioData.length / 1024 / 1024 * 100) / 100);
             
             // Log portfolio summaries
             this.portfolios.forEach((portfolio, index) => {
                 console.log(`- Portfolio ${index + 1}: "${portfolio.title}" with ${portfolio.photos.length} photos`);
                 if (portfolio.photos.length > 0) {
-                    console.log(`  - First photo src length: ${portfolio.photos[0].src ? portfolio.photos[0].src.length : 0}`);
+                    const totalPhotoSize = portfolio.photos.reduce((sum, photo) => sum + (photo.src ? photo.src.length : 0), 0);
+                    console.log(`  - Total photos size: ${Math.round(totalPhotoSize / 1024)} KB`);
                 }
             });
+            
+            // Check storage quota before saving
+            const estimatedQuota = this.getStorageQuota();
+            console.log('📊 Storage info:');
+            console.log('- Estimated quota:', estimatedQuota);
+            console.log('- Current usage:', this.getCurrentStorageUsage());
+            console.log('- Would exceed quota:', portfolioData.length > estimatedQuota * 0.8);
+            
+            if (portfolioData.length > estimatedQuota * 0.8) {
+                console.warn('⚠️ Data size approaching storage quota limit');
+                throw new Error('Portfolio data too large for storage. Try using fewer or smaller photos.');
+            }
             
             localStorage.setItem(storageKey, portfolioData);
             
@@ -258,8 +272,91 @@ class ProfessionalPortfolio {
         } catch (error) {
             console.error('❌ Error saving user portfolios:', error);
             console.error('Error details:', error.message);
-            this.showToast('Failed to save portfolio. Storage may be full.', 'error', 'Save Error');
+            
+            if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+                this.showToast('Storage quota exceeded. Try reducing image count or quality.', 'error', 'Storage Full');
+                this.showStorageQuotaDialog();
+            } else {
+                this.showToast('Failed to save portfolio. Please try again.', 'error', 'Save Error');
+            }
         }
+    }
+
+    getStorageQuota() {
+        // Estimate storage quota - Farcaster iframe typically has ~5-10MB
+        // We'll be conservative and assume 5MB
+        return 5 * 1024 * 1024; // 5MB in characters
+    }
+
+    getCurrentStorageUsage() {
+        let totalSize = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            if (value) {
+                totalSize += key.length + value.length;
+            }
+        }
+        return totalSize;
+    }
+
+    showStorageQuotaDialog() {
+        this.showConfirmDialog(
+            'Storage Quota Exceeded',
+            'Your portfolio is too large for the available storage. Would you like to reduce image quality to fit within the limits?',
+            () => {
+                this.compressExistingPortfolios();
+            },
+            () => {
+                // User chose not to compress, remove the last portfolio to avoid data loss
+                if (this.portfolios.length > 0) {
+                    this.portfolios.pop();
+                    this.showToast('Portfolio creation cancelled to prevent data loss', 'info', 'Cancelled');
+                }
+            }
+        );
+    }
+
+    async compressExistingPortfolios() {
+        this.showToast('Compressing images to fit storage...', 'info', 'Compressing');
+        
+        for (let portfolio of this.portfolios) {
+            for (let i = 0; i < portfolio.photos.length; i++) {
+                const photo = portfolio.photos[i];
+                if (photo.src && photo.src.length > 500000) { // If larger than 500KB
+                    try {
+                        // Re-compress with lower quality
+                        const compressed = await this.recompressImageData(photo.src, 0.5);
+                        portfolio.photos[i].src = compressed;
+                        portfolio.photos[i].compressedSize = compressed.length;
+                    } catch (error) {
+                        console.error('Failed to recompress photo:', photo.name, error);
+                    }
+                }
+            }
+        }
+        
+        // Try saving again
+        this.saveUserPortfolios();
+    }
+
+    async recompressImageData(dataURL, quality = 0.5) {
+        return new Promise((resolve, reject) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                const compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedDataURL);
+            };
+            
+            img.onerror = () => reject(new Error('Failed to recompress image'));
+            img.src = dataURL;
+        });
     }
 
     setupEventListeners() {
@@ -811,39 +908,88 @@ class ProfessionalPortfolio {
                 return;
             }
             
-            // Read file and create preview
+            // Read file and create preview with compression
             console.log('Reading file:', file.name, 'Size:', file.size, 'Type:', file.type);
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                console.log('File read successfully:', file.name);
-                console.log('File data length:', e.target.result.length);
-                const photoData = {
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    src: e.target.result,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type
-                };
+            this.compressAndProcessImage(file).then((photoData) => {
+                console.log('File processed successfully:', file.name);
+                console.log('Original size:', file.size, 'Compressed size:', photoData.compressedSize);
+                console.log('Compression ratio:', Math.round((1 - photoData.compressedSize / file.size) * 100) + '%');
                 
                 console.log('Adding photo to tempPhotos:', photoData.name);
-                console.log('Photo data object:', photoData);
                 this.tempPhotos.push(photoData);
                 console.log('tempPhotos length after push:', this.tempPhotos.length);
-                console.log('tempPhotos array:', this.tempPhotos);
                 this.updatePhotoPreviewGrid();
-            };
-            
-            reader.onerror = (e) => {
-                console.error('Error reading file:', file.name, e);
-            };
-            
-            reader.readAsDataURL(file);
+            }).catch((error) => {
+                console.error('Error processing file:', file.name, error);
+                this.showToast(`Failed to process ${file.name}`, 'error', 'Processing Error');
+            });
         });
         
         if (filesToProcess.length < files.length) {
             this.showToast(`Only ${filesToProcess.length} photos were added. Portfolio limit is ${maxFiles} photos.`, 'warning', 'Upload Limit Reached');
         }
+    }
+
+    async compressAndProcessImage(file, maxWidth = 1200, maxHeight = 800, quality = 0.8) {
+        return new Promise((resolve, reject) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                // Calculate new dimensions while maintaining aspect ratio
+                let { width, height } = img;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+                
+                // Set canvas dimensions
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw and compress image
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convert to base64 with compression
+                const compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+                
+                const photoData = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    src: compressedDataURL,
+                    name: file.name,
+                    size: file.size,
+                    compressedSize: compressedDataURL.length,
+                    type: 'image/jpeg', // Always convert to JPEG for better compression
+                    originalType: file.type,
+                    dimensions: { width, height }
+                };
+                
+                resolve(photoData);
+            };
+            
+            img.onerror = () => {
+                reject(new Error('Failed to load image'));
+            };
+            
+            // Convert file to data URL for image loading
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.onerror = () => {
+                reject(new Error('Failed to read file'));
+            };
+            reader.readAsDataURL(file);
+        });
     }
     
     updatePhotoPreviewGrid() {
@@ -1202,22 +1348,14 @@ class ProfessionalPortfolio {
     }
 
     async addPhotoToEdit(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const photo = {
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    src: e.target.result,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type
-                };
-                
-                this.editingPortfolio.photos.push(photo);
-                resolve();
-            };
-            reader.readAsDataURL(file);
-        });
+        try {
+            const photoData = await this.compressAndProcessImage(file);
+            this.editingPortfolio.photos.push(photoData);
+            return photoData;
+        } catch (error) {
+            console.error('Error adding photo to edit:', error);
+            throw error;
+        }
     }
 
     saveEditedPortfolio() {
@@ -1296,23 +1434,15 @@ class ProfessionalPortfolio {
     }
 
     async addPhotoToCurrentPortfolio(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const photo = {
-                    id: Date.now() + Math.random(),
-                    src: e.target.result,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    uploadedAt: new Date().toISOString()
-                };
-                
-                this.currentPortfolio.photos.push(photo);
-                resolve();
-            };
-            reader.readAsDataURL(file);
-        });
+        try {
+            const photoData = await this.compressAndProcessImage(file);
+            photoData.uploadedAt = new Date().toISOString();
+            this.currentPortfolio.photos.push(photoData);
+            return photoData;
+        } catch (error) {
+            console.error('Error adding photo to current portfolio:', error);
+            throw error;
+        }
     }
 
     updatePhotoGrid() {
