@@ -267,7 +267,7 @@ class ProfessionalPortfolio {
         this.currentPortfolio = null;
         
         // Update header
-        const title = document.getElementById('portfolio-title');
+        const title = document.getElementById('header-title');
         const subtitle = document.getElementById('portfolio-subtitle');
         const meta = document.querySelector('.portfolio-meta');
         
@@ -292,7 +292,7 @@ class ProfessionalPortfolio {
         if (!this.currentPortfolio) return;
 
         // Update header
-        const title = document.getElementById('portfolio-title');
+        const title = document.getElementById('header-title');
         const subtitle = document.getElementById('portfolio-subtitle');
         const meta = document.querySelector('.portfolio-meta');
         
@@ -349,6 +349,11 @@ class ProfessionalPortfolio {
             `;
         }
         
+        // Setup event listeners for portfolio grid
+        this.setupPortfolioGridEventListeners();
+    }
+
+    setupPortfolioGridEventListeners() {
         // Add event delegation for Create Portfolio buttons
         const createButtons = document.querySelectorAll('.create-portfolio-btn');
         createButtons.forEach(button => {
@@ -435,14 +440,31 @@ class ProfessionalPortfolio {
             return;
         }
         
-        // Reset form
-        this.resetPortfolioForm();
+        // Initialize tempPhotos array if not exists
+        if (!this.tempPhotos) {
+            this.tempPhotos = [];
+            console.log('tempPhotos created as new array');
+        } else {
+            console.log('tempPhotos already exists with', this.tempPhotos.length, 'photos');
+        }
+        console.log('tempPhotos initialized:', this.tempPhotos);
+        
+        // Clear only the text form fields, NOT the file input
+        const titleInput = document.getElementById('portfolio-title');
+        const descriptionInput = document.getElementById('portfolio-description');
+        
+        if (titleInput) titleInput.value = '';
+        if (descriptionInput) descriptionInput.value = '';
+        // DO NOT clear file input - let it keep the selected files
         
         // Show modal
         modal.classList.add('active');
         
         // Setup event listeners
         this.setupModalEventListeners();
+        
+        // Update photo preview grid in case there are existing photos
+        this.updatePhotoPreviewGrid();
         
         // Focus on title input
         setTimeout(() => {
@@ -455,7 +477,7 @@ class ProfessionalPortfolio {
         const modal = document.getElementById('portfolio-creation-modal');
         if (modal) {
             modal.classList.remove('active');
-            this.resetPortfolioForm();
+            // Don't reset form immediately - let the creation process complete first
         }
     }
     
@@ -493,30 +515,49 @@ class ProfessionalPortfolio {
         // Close button
         const closeBtn = document.getElementById('portfolio-modal-close');
         if (closeBtn) {
-            this.modalCloseHandler = () => this.hideCreatePortfolioModal();
+            this.modalCloseHandler = () => {
+                this.hideCreatePortfolioModal();
+                this.resetPortfolioForm();
+            };
             closeBtn.addEventListener('click', this.modalCloseHandler);
         }
         
         // Cancel button
         const cancelBtn = document.getElementById('cancel-portfolio');
         if (cancelBtn) {
-            this.modalCancelHandler = () => this.hideCreatePortfolioModal();
+            this.modalCancelHandler = () => {
+                this.hideCreatePortfolioModal();
+                this.resetPortfolioForm();
+            };
             cancelBtn.addEventListener('click', this.modalCancelHandler);
         }
         
-        // Form submission
+        // Form submission - disabled to prevent double triggering
         const form = document.getElementById('portfolio-creation-form');
         console.log('Form element found:', !!form);
         if (form) {
-            console.log('Setting up form submit handler');
-            this.modalFormHandler = (e) => {
-                console.log('Form submit event triggered');
-                e.preventDefault();
-                this.createNewPortfolioFromModal();
-            };
-            form.addEventListener('submit', this.modalFormHandler);
+            console.log('Form found but not setting up submit handler - using direct click handler instead');
         } else {
             console.error('Portfolio creation form not found!');
+        }
+        
+        // Also add direct click handler to Create Portfolio button as backup
+        const createBtn = document.getElementById('create-portfolio-btn');
+        if (createBtn) {
+            console.log('Setting up direct click handler for Create Portfolio button');
+            this.createBtnHandler = (e) => {
+                console.log('Create Portfolio button clicked directly');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Debug file input state
+                const fileInput = document.getElementById('modal-file-input');
+                console.log('File input found:', !!fileInput);
+                console.log('Files in input:', fileInput ? fileInput.files.length : 'no input');
+                
+                this.createNewPortfolioFromModal();
+            };
+            createBtn.addEventListener('click', this.createBtnHandler);
         }
         
         // File input and upload zone
@@ -578,6 +619,7 @@ class ProfessionalPortfolio {
             this.modalBackdropHandler = (e) => {
                 if (e.target === modal) {
                     this.hideCreatePortfolioModal();
+                    this.resetPortfolioForm();
                 }
             };
             modal.addEventListener('click', this.modalBackdropHandler);
@@ -588,6 +630,7 @@ class ProfessionalPortfolio {
         const closeBtn = document.getElementById('portfolio-modal-close');
         const cancelBtn = document.getElementById('cancel-portfolio');
         const form = document.getElementById('portfolio-creation-form');
+        const createBtn = document.getElementById('create-portfolio-btn');
         const fileInput = document.getElementById('modal-file-input');
         const uploadZone = document.getElementById('modal-upload-zone');
         const modal = document.getElementById('portfolio-creation-modal');
@@ -598,8 +641,9 @@ class ProfessionalPortfolio {
         if (cancelBtn && this.modalCancelHandler) {
             cancelBtn.removeEventListener('click', this.modalCancelHandler);
         }
-        if (form && this.modalFormHandler) {
-            form.removeEventListener('submit', this.modalFormHandler);
+        // Form handler removed - using direct click handler instead
+        if (createBtn && this.createBtnHandler) {
+            createBtn.removeEventListener('click', this.createBtnHandler);
         }
         if (fileInput && this.fileInputChangeHandler) {
             fileInput.removeEventListener('change', this.fileInputChangeHandler);
@@ -661,17 +705,20 @@ class ProfessionalPortfolio {
             
             reader.onload = (e) => {
                 console.log('File read successfully:', file.name);
+                console.log('File data length:', e.target.result.length);
                 const photoData = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    data: e.target.result,
+                    src: e.target.result,
                     name: file.name,
                     size: file.size,
                     type: file.type
                 };
                 
                 console.log('Adding photo to tempPhotos:', photoData.name);
+                console.log('Photo data object:', photoData);
                 this.tempPhotos.push(photoData);
                 console.log('tempPhotos length after push:', this.tempPhotos.length);
+                console.log('tempPhotos array:', this.tempPhotos);
                 this.updatePhotoPreviewGrid();
             };
             
@@ -708,7 +755,7 @@ class ProfessionalPortfolio {
         previewGrid.style.display = 'grid';
         previewGrid.innerHTML = this.tempPhotos.map(photo => `
             <div class="photo-preview-item">
-                <img src="${photo.data}" alt="${photo.name}" class="photo-preview-image">
+                <img src="${photo.src}" alt="${photo.name}" class="photo-preview-image">
                 <button class="photo-preview-remove" data-photo-id="${photo.id}" title="Remove photo">
                     ×
                 </button>
@@ -736,100 +783,72 @@ class ProfessionalPortfolio {
     
     createNewPortfolioFromModal() {
         console.log('=== PORTFOLIO CREATION START ===');
+        console.log('tempPhotos at start:', this.tempPhotos);
+        console.log('tempPhotos length at start:', this.tempPhotos ? this.tempPhotos.length : 0);
         
-        // Get form elements with multiple fallback methods
-        const modal = document.getElementById('portfolio-creation-modal');
-        const form = document.getElementById('portfolio-creation-form');
+        // Get form data
+        const titleElement = document.getElementById('portfolio-title');
+        const descriptionElement = document.getElementById('portfolio-description');
+        const fileInput = document.getElementById('modal-file-input');
         
-        console.log('Modal found:', !!modal);
-        console.log('Form found:', !!form);
-        
-        // Try multiple ways to get the title input
-        let titleElement = document.getElementById('portfolio-title');
-        if (!titleElement && form) {
-            titleElement = form.querySelector('#portfolio-title');
-        }
-        if (!titleElement && modal) {
-            titleElement = modal.querySelector('#portfolio-title');
-        }
-        
-        // Try multiple ways to get the description textarea
-        let descriptionElement = document.getElementById('portfolio-description');
-        if (!descriptionElement && form) {
-            descriptionElement = form.querySelector('#portfolio-description');
-        }
-        if (!descriptionElement && modal) {
-            descriptionElement = modal.querySelector('#portfolio-description');
-        }
-        
-        console.log('Title element found:', !!titleElement);
-        console.log('Description element found:', !!descriptionElement);
-        
-        if (!titleElement) {
-            console.error('Title element not found!');
-            alert('Error: Could not find title field. Please refresh and try again.');
+        if (!titleElement || !fileInput) {
+            console.error('Required elements not found');
+            alert('Error: Form elements not found. Please refresh and try again.');
             return;
         }
         
-        const title = titleElement.value ? titleElement.value.trim() : '';
-        const description = descriptionElement ? (descriptionElement.value ? descriptionElement.value.trim() : '') : '';
+        const title = titleElement.value.trim();
+        const description = descriptionElement ? descriptionElement.value.trim() : '';
         
-        console.log('Final title value:', `"${title}"`);
-        console.log('Final description value:', `"${description}"`);
-        
-        if (!title || title.length === 0) {
-            console.log('Title validation failed');
+        if (!title) {
             alert('Please enter a portfolio title');
             titleElement.focus();
             return;
         }
         
-        console.log('Portfolio count check:', this.portfolios.length, 'max:', this.maxPortfolios);
-        
         if (this.portfolios.length >= this.maxPortfolios) {
-            console.log('Portfolio limit reached');
             alert(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`);
             return;
         }
         
-        console.log('Creating portfolio with photos:', this.tempPhotos ? this.tempPhotos.length : 0);
+        // Use tempPhotos array directly since it's already populated
+        console.log('tempPhotos before creating portfolio:', this.tempPhotos);
+        console.log('tempPhotos length before creating portfolio:', this.tempPhotos ? this.tempPhotos.length : 0);
         
+        // Make a deep copy to preserve the data
+        const photosToUse = this.tempPhotos && this.tempPhotos.length > 0 ? 
+            this.tempPhotos.map(photo => ({...photo})) : [];
+        
+        console.log('Photos to use (copied):', photosToUse);
+        console.log('Creating portfolio with', photosToUse.length, 'photos');
+        
+        // Create portfolio with photos from tempPhotos
         const newPortfolio = {
             id: Date.now().toString(),
             title: title,
             description: description,
-            photos: this.tempPhotos ? [...this.tempPhotos] : [],
+            photos: photosToUse,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
         
-        console.log('New portfolio object:', newPortfolio);
+        console.log('Portfolio created:', newPortfolio);
+        console.log('Portfolio photos count:', newPortfolio.photos.length);
         
-        try {
-            this.portfolios.push(newPortfolio);
-            console.log('Portfolio added to array, total portfolios:', this.portfolios.length);
-            
-            this.saveUserPortfolios();
-            console.log('Portfolios saved to storage');
-            
-            // Clear temp photos
-            this.tempPhotos = [];
-            console.log('Temp photos cleared');
-            
-            this.hideCreatePortfolioModal();
-            console.log('Modal hidden');
-            
-            this.updateUI();
-            console.log('UI updated');
-            
-            // Show success message
-            alert(`Portfolio "${title}" created successfully!`);
-            console.log('=== PORTFOLIO CREATION SUCCESS ===');
-            
-        } catch (error) {
-            console.error('Error creating portfolio:', error);
-            alert('Error creating portfolio. Please try again.');
-        }
+        this.portfolios.push(newPortfolio);
+        this.saveUserPortfolios();
+        
+        console.log('Portfolio saved successfully');
+        
+        // Clear tempPhotos after successful creation
+        this.tempPhotos = [];
+        
+        this.hideCreatePortfolioModal();
+        this.resetPortfolioForm(); // Reset form after successful creation
+        this.showPortfoliosView();
+        alert(`Portfolio "${title}" created successfully with ${photosToUse.length} photos!`);
+        
+        console.log('=== PORTFOLIO CREATION END ===');
     }
     
     createNewPortfolio() {
