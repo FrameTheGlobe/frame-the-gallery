@@ -12,13 +12,36 @@ class ProfessionalPortfolio {
         this.currentView = 'portfolios'; // 'portfolios' or 'portfolio-detail'
         this.tempPhotos = []; // For modal photo uploads
         this.editingPortfolio = null; // For edit modal
+        this.cloudStorage = new CloudStorageService();
+        this.useCloudStorage = true; // Enable cloud storage by default
+        this.uploadProgress = { current: 0, total: 0, currentFile: '' };
         
         this.init();
     }
 
     async init() {
         try {
-            console.log('Initializing Professional Portfolio...');
+            console.log('🌐 Initializing Cloud-Enabled Portfolio...');
+            
+            // Test cloud connectivity first
+            if (this.useCloudStorage) {
+                try {
+                    const cloudConnected = await this.cloudStorage.testConnection();
+                    console.log('Cloud connectivity:', cloudConnected ? '✅ Connected' : '❌ Failed');
+                    
+                    if (!cloudConnected) {
+                        console.warn('Cloud storage unavailable, falling back to localStorage');
+                        this.useCloudStorage = false;
+                        this.showToast('Using local storage. Portfolios won\'t sync across devices.', 'info', 'Offline Mode');
+                    } else {
+                        console.log('✅ Cloud storage enabled');
+                        this.showToast('Cloud storage connected. Portfolios will sync across devices.', 'success', 'Cloud Connected');
+                    }
+                } catch (error) {
+                    console.error('Cloud connectivity test failed:', error);
+                    this.useCloudStorage = false;
+                }
+            }
             
             // Setup event listeners first
             this.setupEventListeners();
@@ -194,84 +217,71 @@ class ProfessionalPortfolio {
 
     async loadUserPortfolios() {
         try {
-            // Load portfolios from localStorage based on user FID
-            const storageKey = `portfolios_${this.userFid}`;
-            const savedPortfolios = localStorage.getItem(storageKey);
-            
-            console.log('📁 Loading portfolios:');
-            console.log('- Storage key:', storageKey);
-            console.log('- Raw data found:', !!savedPortfolios);
-            console.log('- Data length:', savedPortfolios ? savedPortfolios.length : 0);
-            
-            if (savedPortfolios) {
-                this.portfolios = JSON.parse(savedPortfolios);
-                console.log(`✅ Loaded ${this.portfolios.length} portfolios for user ${this.userFid}`);
-                
-                // Log details of loaded portfolios
-                this.portfolios.forEach((portfolio, index) => {
-                    console.log(`- Portfolio ${index + 1}: "${portfolio.title}" with ${portfolio.photos.length} photos`);
-                    if (portfolio.photos.length > 0) {
-                        console.log(`  - Sample photo: ${portfolio.photos[0].name}, src length: ${portfolio.photos[0].src ? portfolio.photos[0].src.length : 0}`);
-                    }
-                });
+            if (this.useCloudStorage) {
+                console.log('🌐 Loading portfolios from cloud...');
+                this.portfolios = await this.cloudStorage.loadPortfolios(this.userFid);
+                console.log(`✅ Loaded ${this.portfolios.length} portfolios from cloud`);
             } else {
-                this.portfolios = [];
-                console.log(`⚠️ No saved portfolios found for user ${this.userFid}`);
+                // Fallback to localStorage
+                const storageKey = `portfolios_${this.userFid}`;
+                const savedPortfolios = localStorage.getItem(storageKey);
+                
+                console.log('📁 Loading portfolios from localStorage:');
+                console.log('- Storage key:', storageKey);
+                console.log('- Raw data found:', !!savedPortfolios);
+                
+                if (savedPortfolios) {
+                    this.portfolios = JSON.parse(savedPortfolios);
+                    console.log(`✅ Loaded ${this.portfolios.length} portfolios from localStorage`);
+                } else {
+                    this.portfolios = [];
+                    console.log(`⚠️ No saved portfolios found for user ${this.userFid}`);
+                }
             }
+            
+            // Log portfolio details
+            this.portfolios.forEach((portfolio, index) => {
+                console.log(`- Portfolio ${index + 1}: "${portfolio.title}" with ${portfolio.photos.length} photos`);
+            });
+            
         } catch (error) {
             console.error('❌ Error loading user portfolios:', error);
-            console.error('Error details:', error.message);
             this.portfolios = [];
             this.showToast('Failed to load existing portfolios', 'warning', 'Load Error');
         }
     }
 
-    saveUserPortfolios() {
+    async saveUserPortfolios() {
         try {
-            const storageKey = `portfolios_${this.userFid}`;
-            const portfolioData = JSON.stringify(this.portfolios);
-            
-            console.log('💾 Saving portfolios:');
-            console.log('- Storage key:', storageKey);
+            console.log('💾 Saving portfolios...');
             console.log('- Number of portfolios:', this.portfolios.length);
-            console.log('- Data size:', portfolioData.length, 'characters');
-            console.log('- Data size (MB):', Math.round(portfolioData.length / 1024 / 1024 * 100) / 100);
             
-            // Log portfolio summaries
-            this.portfolios.forEach((portfolio, index) => {
-                console.log(`- Portfolio ${index + 1}: "${portfolio.title}" with ${portfolio.photos.length} photos`);
-                if (portfolio.photos.length > 0) {
-                    const totalPhotoSize = portfolio.photos.reduce((sum, photo) => sum + (photo.src ? photo.src.length : 0), 0);
-                    console.log(`  - Total photos size: ${Math.round(totalPhotoSize / 1024)} KB`);
-                }
-            });
-            
-            // Check storage quota before saving
-            const estimatedQuota = this.getStorageQuota();
-            console.log('📊 Storage info:');
-            console.log('- Estimated quota:', estimatedQuota);
-            console.log('- Current usage:', this.getCurrentStorageUsage());
-            console.log('- Would exceed quota:', portfolioData.length > estimatedQuota * 0.8);
-            
-            if (portfolioData.length > estimatedQuota * 0.8) {
-                console.warn('⚠️ Data size approaching storage quota limit');
-                throw new Error('Portfolio data too large for storage. Try using fewer or smaller photos.');
-            }
-            
-            localStorage.setItem(storageKey, portfolioData);
-            
-            // Verify the save worked
-            const verification = localStorage.getItem(storageKey);
-            if (verification) {
-                console.log('✅ Save verified - data exists in localStorage');
+            if (this.useCloudStorage) {
+                console.log('🌐 Saving to cloud storage...');
+                await this.cloudStorage.savePortfolios(this.portfolios, this.userFid);
+                console.log(`✅ Saved ${this.portfolios.length} portfolios to cloud`);
             } else {
-                console.error('❌ Save failed - no data found after saving');
+                // Fallback to localStorage with quota checking
+                const storageKey = `portfolios_${this.userFid}`;
+                const portfolioData = JSON.stringify(this.portfolios);
+                
+                console.log('📁 Saving to localStorage:');
+                console.log('- Storage key:', storageKey);
+                console.log('- Data size:', portfolioData.length, 'characters');
+                console.log('- Data size (MB):', Math.round(portfolioData.length / 1024 / 1024 * 100) / 100);
+                
+                // Check storage quota before saving
+                const estimatedQuota = this.getStorageQuota();
+                if (portfolioData.length > estimatedQuota * 0.8) {
+                    console.warn('⚠️ Data size approaching storage quota limit');
+                    throw new Error('Portfolio data too large for storage. Try using fewer or smaller photos.');
+                }
+                
+                localStorage.setItem(storageKey, portfolioData);
+                console.log(`✅ Saved ${this.portfolios.length} portfolios to localStorage`);
             }
-            
-            console.log(`✅ Saved ${this.portfolios.length} portfolios for user ${this.userFid}`);
         } catch (error) {
             console.error('❌ Error saving user portfolios:', error);
-            console.error('Error details:', error.message);
             
             if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
                 this.showToast('Storage quota exceeded. Try reducing image count or quality.', 'error', 'Storage Full');
@@ -279,6 +289,7 @@ class ProfessionalPortfolio {
             } else {
                 this.showToast('Failed to save portfolio. Please try again.', 'error', 'Save Error');
             }
+            throw error; // Re-throw for calling functions to handle
         }
     }
 
@@ -868,8 +879,8 @@ class ProfessionalPortfolio {
         }
     }
 
-    handleFileSelection(files) {
-        console.log('handleFileSelection called with:', files);
+    async handleFileSelection(files) {
+        console.log('🌐 handleFileSelection called with:', files);
         
         if (!files || files.length === 0) {
             console.log('No files provided');
@@ -884,50 +895,101 @@ class ProfessionalPortfolio {
         
         // Initialize tempPhotos if not exists
         if (!this.tempPhotos) {
-            console.log('Initializing tempPhotos array');
             this.tempPhotos = [];
         }
-        
-        console.log('Current tempPhotos length:', this.tempPhotos.length);
         
         const remainingSlots = maxFiles - this.tempPhotos.length;
         const filesToProcess = Array.from(files).slice(0, remainingSlots);
         
         console.log('Files to process:', filesToProcess.length);
         
-        filesToProcess.forEach(file => {
-            // Validate file type
+        // Validate files first
+        const validFiles = [];
+        for (const file of filesToProcess) {
             if (!allowedTypes.includes(file.type)) {
-                this.showToast(`${file.name} is not a supported image format. Please use JPG, PNG, or WebP.`, 'error', 'Invalid File Type');
-                return;
+                this.showToast(`${file.name} is not a supported image format.`, 'error', 'Invalid File Type');
+                continue;
             }
             
-            // Validate file size
             if (file.size > maxFileSize) {
                 this.showToast(`${file.name} is too large. Maximum file size is 10MB.`, 'error', 'File Too Large');
-                return;
+                continue;
             }
             
-            // Read file and create preview with compression
-            console.log('Reading file:', file.name, 'Size:', file.size, 'Type:', file.type);
-            this.compressAndProcessImage(file).then((photoData) => {
-                console.log('File processed successfully:', file.name);
-                console.log('Original size:', file.size, 'Compressed size:', photoData.compressedSize);
-                console.log('Compression ratio:', Math.round((1 - photoData.compressedSize / file.size) * 100) + '%');
+            validFiles.push(file);
+        }
+        
+        if (validFiles.length === 0) {
+            return;
+        }
+        
+        try {
+            if (this.useCloudStorage) {
+                // Upload to cloud storage
+                console.log('🌐 Uploading files to cloud storage...');
+                this.showUploadProgress(true);
                 
-                console.log('Adding photo to tempPhotos:', photoData.name);
-                this.tempPhotos.push(photoData);
-                console.log('tempPhotos length after push:', this.tempPhotos.length);
-                this.updatePhotoPreviewGrid();
-            }).catch((error) => {
-                console.error('Error processing file:', file.name, error);
-                this.showToast(`Failed to process ${file.name}`, 'error', 'Processing Error');
-            });
-        });
+                const results = await this.cloudStorage.uploadImages(
+                    validFiles, 
+                    this.userFid,
+                    (current, total, fileName) => {
+                        this.updateUploadProgress(current, total, fileName);
+                    }
+                );
+                
+                // Add successful uploads to tempPhotos
+                const successfulUploads = results.filter(r => !r.error);
+                this.tempPhotos.push(...successfulUploads);
+                
+                // Report failed uploads
+                const failedUploads = results.filter(r => r.error);
+                if (failedUploads.length > 0) {
+                    this.showToast(`${failedUploads.length} files failed to upload`, 'warning', 'Partial Upload');
+                }
+                
+                console.log(`✅ Successfully uploaded ${successfulUploads.length} files to cloud`);
+                this.showUploadProgress(false);
+                
+            } else {
+                // Fallback to local compression
+                console.log('📁 Processing files locally...');
+                for (const file of validFiles) {
+                    try {
+                        const photoData = await this.compressAndProcessImage(file);
+                        console.log('File processed:', file.name, 'Compressed size:', photoData.compressedSize);
+                        this.tempPhotos.push(photoData);
+                    } catch (error) {
+                        console.error('Error processing file:', file.name, error);
+                        this.showToast(`Failed to process ${file.name}`, 'error', 'Processing Error');
+                    }
+                }
+            }
+            
+            this.updatePhotoPreviewGrid();
+            
+        } catch (error) {
+            console.error('❌ File processing failed:', error);
+            this.showToast('Failed to process files. Please try again.', 'error', 'Upload Error');
+        }
         
         if (filesToProcess.length < files.length) {
-            this.showToast(`Only ${filesToProcess.length} photos were added. Portfolio limit is ${maxFiles} photos.`, 'warning', 'Upload Limit Reached');
+            this.showToast(`Only ${filesToProcess.length} photos were processed. Portfolio limit is ${maxFiles} photos.`, 'warning', 'Upload Limit');
         }
+    }
+
+    showUploadProgress(show) {
+        if (show) {
+            console.log('📤 Starting upload...');
+            // You could show a progress modal here
+        } else {
+            console.log('✅ Upload complete');
+        }
+    }
+
+    updateUploadProgress(current, total, fileName) {
+        this.uploadProgress = { current, total, currentFile: fileName };
+        console.log(`📤 Uploading ${current}/${total}: ${fileName}`);
+        // Update progress UI here if needed
     }
 
     async compressAndProcessImage(file, maxWidth = 1200, maxHeight = 800, quality = 0.8) {
@@ -1039,7 +1101,7 @@ class ProfessionalPortfolio {
         this.updatePhotoPreviewGrid();
     }
     
-    createNewPortfolioFromModal() {
+    async createNewPortfolioFromModal() {
         console.log('=== PORTFOLIO CREATION START ===');
         console.log('🔍 Farcaster Context Debug:');
         console.log('- Running in iframe:', window.parent !== window);
@@ -1110,18 +1172,25 @@ class ProfessionalPortfolio {
         console.log('Portfolio created:', newPortfolio);
         console.log('Portfolio photos count:', newPortfolio.photos.length);
         
-        this.portfolios.push(newPortfolio);
-        this.saveUserPortfolios();
-        
-        console.log('Portfolio saved successfully');
-        
-        // Clear tempPhotos after successful creation
-        this.tempPhotos = [];
-        
-        this.hideCreatePortfolioModal();
-        this.resetPortfolioForm(); // Reset form after successful creation
-        this.showPortfoliosView();
-        this.showToast(`Portfolio "${title}" created successfully with ${photosToUse.length} photos!`, 'success', 'Portfolio Created');
+        try {
+            this.portfolios.push(newPortfolio);
+            await this.saveUserPortfolios();
+            
+            console.log('Portfolio saved successfully');
+            
+            // Clear tempPhotos after successful creation
+            this.tempPhotos = [];
+            
+            this.hideCreatePortfolioModal();
+            this.resetPortfolioForm(); // Reset form after successful creation
+            this.showPortfoliosView();
+            this.showToast(`Portfolio "${title}" created successfully with ${photosToUse.length} photos!`, 'success', 'Portfolio Created');
+            
+        } catch (error) {
+            // Remove portfolio from local array if save failed
+            this.portfolios.pop();
+            this.showToast('Failed to save portfolio. Please try again.', 'error', 'Save Failed');
+        }
         
         console.log('=== PORTFOLIO CREATION END ===');
     }
