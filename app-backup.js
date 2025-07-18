@@ -11,7 +11,6 @@ class ProfessionalPortfolio {
         this.currentPhotoIndex = 0;
         this.currentView = 'portfolios'; // 'portfolios' or 'portfolio-detail'
         this.tempPhotos = []; // For modal photo uploads
-        this.editingPortfolio = null; // For edit modal
         
         this.init();
     }
@@ -478,7 +477,7 @@ class ProfessionalPortfolio {
         const modal = document.getElementById('portfolio-creation-modal');
         if (modal) {
             modal.classList.remove('active');
-            // Don't reset form immediately - let the creation process complete first
+            this.resetPortfolioForm();
         }
     }
     
@@ -516,20 +515,14 @@ class ProfessionalPortfolio {
         // Close button
         const closeBtn = document.getElementById('portfolio-modal-close');
         if (closeBtn) {
-            this.modalCloseHandler = () => {
-                this.hideCreatePortfolioModal();
-                this.resetPortfolioForm();
-            };
+            this.modalCloseHandler = () => this.hideCreatePortfolioModal();
             closeBtn.addEventListener('click', this.modalCloseHandler);
         }
         
         // Cancel button
         const cancelBtn = document.getElementById('cancel-portfolio');
         if (cancelBtn) {
-            this.modalCancelHandler = () => {
-                this.hideCreatePortfolioModal();
-                this.resetPortfolioForm();
-            };
+            this.modalCancelHandler = () => this.hideCreatePortfolioModal();
             cancelBtn.addEventListener('click', this.modalCancelHandler);
         }
         
@@ -620,7 +613,6 @@ class ProfessionalPortfolio {
             this.modalBackdropHandler = (e) => {
                 if (e.target === modal) {
                     this.hideCreatePortfolioModal();
-                    this.resetPortfolioForm();
                 }
             };
             modal.addEventListener('click', this.modalBackdropHandler);
@@ -690,13 +682,13 @@ class ProfessionalPortfolio {
         filesToProcess.forEach(file => {
             // Validate file type
             if (!allowedTypes.includes(file.type)) {
-                this.showToast(`${file.name} is not a supported image format. Please use JPG, PNG, or WebP.`, 'error', 'Invalid File Type');
+                alert(`${file.name} is not a supported image format. Please use JPG, PNG, or WebP.`);
                 return;
             }
             
             // Validate file size
             if (file.size > maxFileSize) {
-                this.showToast(`${file.name} is too large. Maximum file size is 10MB.`, 'error', 'File Too Large');
+                alert(`${file.name} is too large. Maximum file size is 10MB.`);
                 return;
             }
             
@@ -731,7 +723,7 @@ class ProfessionalPortfolio {
         });
         
         if (filesToProcess.length < files.length) {
-            this.showToast(`Only ${filesToProcess.length} photos were added. Portfolio limit is ${maxFiles} photos.`, 'warning', 'Upload Limit Reached');
+            alert(`Only ${filesToProcess.length} photos were added. Portfolio limit is ${maxFiles} photos.`);
         }
     }
     
@@ -783,9 +775,7 @@ class ProfessionalPortfolio {
     }
     
     createNewPortfolioFromModal() {
-        console.log('=== PORTFOLIO CREATION START ===');
-        console.log('tempPhotos at start:', this.tempPhotos);
-        console.log('tempPhotos length at start:', this.tempPhotos ? this.tempPhotos.length : 0);
+        console.log('=== SIMPLE PORTFOLIO CREATION START ===');
         
         // Get form data
         const titleElement = document.getElementById('portfolio-title');
@@ -794,7 +784,7 @@ class ProfessionalPortfolio {
         
         if (!titleElement || !fileInput) {
             console.error('Required elements not found');
-            this.showToast('Form elements not found. Please refresh and try again.', 'error', 'Error');
+            alert('Error: Form elements not found. Please refresh and try again.');
             return;
         }
         
@@ -802,25 +792,22 @@ class ProfessionalPortfolio {
         const description = descriptionElement ? descriptionElement.value.trim() : '';
         
         if (!title) {
-            this.showToast('Please enter a portfolio title', 'error', 'Title Required');
+            alert('Please enter a portfolio title');
             titleElement.focus();
             return;
         }
         
         if (this.portfolios.length >= this.maxPortfolios) {
-            this.showToast(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`, 'warning', 'Portfolio Limit Reached');
+            alert(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`);
             return;
         }
         
         // Use tempPhotos array directly since it's already populated
-        console.log('tempPhotos before creating portfolio:', this.tempPhotos);
-        console.log('tempPhotos length before creating portfolio:', this.tempPhotos ? this.tempPhotos.length : 0);
+        console.log('Using tempPhotos array:', this.tempPhotos);
+        console.log('tempPhotos length:', this.tempPhotos ? this.tempPhotos.length : 0);
         
-        // Make a deep copy to preserve the data
-        const photosToUse = this.tempPhotos && this.tempPhotos.length > 0 ? 
-            this.tempPhotos.map(photo => ({...photo})) : [];
+        const photosToUse = this.tempPhotos && this.tempPhotos.length > 0 ? [...this.tempPhotos] : [];
         
-        console.log('Photos to use (copied):', photosToUse);
         console.log('Creating portfolio with', photosToUse.length, 'photos');
         
         // Create portfolio with photos from tempPhotos
@@ -834,22 +821,17 @@ class ProfessionalPortfolio {
         };
         
         console.log('Portfolio created:', newPortfolio);
-        console.log('Portfolio photos count:', newPortfolio.photos.length);
+        console.log('Portfolio photos:', newPortfolio.photos);
         
         this.portfolios.push(newPortfolio);
         this.saveUserPortfolios();
-        
-        console.log('Portfolio saved successfully');
         
         // Clear tempPhotos after successful creation
         this.tempPhotos = [];
         
         this.hideCreatePortfolioModal();
-        this.resetPortfolioForm(); // Reset form after successful creation
         this.showPortfoliosView();
-        this.showToast(`Portfolio "${title}" created successfully with ${photosToUse.length} photos!`, 'success', 'Portfolio Created');
-        
-        console.log('=== PORTFOLIO CREATION END ===');
+        alert(`Portfolio "${title}" created successfully with ${photosToUse.length} photos!`);
     }
     
     createNewPortfolio() {
@@ -857,12 +839,12 @@ class ProfessionalPortfolio {
         const description = document.getElementById('portfolio-description').value.trim();
         
         if (!title) {
-            this.showToast('Please enter a portfolio title', 'error', 'Title Required');
+            alert('Please enter a portfolio title');
             return;
         }
 
         if (this.portfolios.length >= this.maxPortfolios) {
-            this.showToast(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`, 'warning', 'Portfolio Limit Reached');
+            alert(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`);
             return;
         }
 
@@ -895,259 +877,33 @@ class ProfessionalPortfolio {
         const portfolio = this.portfolios.find(p => p.id === portfolioId);
         if (!portfolio) return;
 
-        this.editingPortfolio = portfolio;
-        this.showEditPortfolioModal();
-    }
-
-    showEditPortfolioModal() {
-        if (!this.editingPortfolio) return;
-
-        const modal = document.getElementById('portfolio-edit-modal');
-        if (!modal) return;
-
-        // Populate form with current portfolio data
-        const titleInput = document.getElementById('edit-portfolio-title');
-        const descriptionInput = document.getElementById('edit-portfolio-description');
-        
-        if (titleInput) titleInput.value = this.editingPortfolio.title;
-        if (descriptionInput) descriptionInput.value = this.editingPortfolio.description || '';
-
-        // Show existing photos
-        this.updateEditPhotoGrid();
-
-        // Show modal
-        modal.classList.add('active');
-
-        // Setup event listeners
-        this.setupEditModalEventListeners();
-
-        // Focus on title input
-        setTimeout(() => {
-            if (titleInput) titleInput.focus();
-        }, 100);
-    }
-
-    hideEditPortfolioModal() {
-        const modal = document.getElementById('portfolio-edit-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            this.editingPortfolio = null;
+        const newTitle = prompt('Enter new title:', portfolio.title);
+        if (newTitle && newTitle.trim()) {
+            portfolio.title = newTitle.trim();
+            
+            const newDescription = prompt('Enter new description:', portfolio.description || '');
+            portfolio.description = newDescription ? newDescription.trim() : '';
+            
+            portfolio.updatedAt = new Date().toISOString();
+            this.saveUserPortfolios();
+            this.updateUI();
         }
-    }
-
-    updateEditPhotoGrid() {
-        const grid = document.getElementById('edit-photo-grid');
-        if (!grid || !this.editingPortfolio) return;
-
-        if (this.editingPortfolio.photos.length === 0) {
-            grid.style.display = 'none';
-            return;
-        }
-
-        grid.style.display = 'grid';
-        grid.innerHTML = this.editingPortfolio.photos.map(photo => `
-            <div class="photo-preview-item">
-                <img src="${photo.src}" alt="${photo.name}" class="photo-preview-image">
-                <button class="photo-preview-remove" data-photo-id="${photo.id}" title="Remove photo">
-                    ×
-                </button>
-            </div>
-        `).join('');
-
-        // Add event listeners for remove buttons
-        const removeButtons = grid.querySelectorAll('.photo-preview-remove');
-        removeButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const photoId = button.getAttribute('data-photo-id');
-                this.removePhotoFromEdit(photoId);
-            });
-        });
-    }
-
-    removePhotoFromEdit(photoId) {
-        if (!this.editingPortfolio) return;
-        
-        this.editingPortfolio.photos = this.editingPortfolio.photos.filter(photo => photo.id !== photoId);
-        this.updateEditPhotoGrid();
-    }
-
-    setupEditModalEventListeners() {
-        // Remove existing listeners
-        this.removeEditModalEventListeners();
-
-        // Close button
-        const closeBtn = document.getElementById('edit-modal-close');
-        if (closeBtn) {
-            this.editModalCloseHandler = () => this.hideEditPortfolioModal();
-            closeBtn.addEventListener('click', this.editModalCloseHandler);
-        }
-
-        // Cancel button
-        const cancelBtn = document.getElementById('cancel-edit');
-        if (cancelBtn) {
-            this.editModalCancelHandler = () => this.hideEditPortfolioModal();
-            cancelBtn.addEventListener('click', this.editModalCancelHandler);
-        }
-
-        // Save button
-        const saveBtn = document.getElementById('save-portfolio-btn');
-        if (saveBtn) {
-            this.editModalSaveHandler = (e) => {
-                e.preventDefault();
-                this.saveEditedPortfolio();
-            };
-            saveBtn.addEventListener('click', this.editModalSaveHandler);
-        }
-
-        // File input for adding photos
-        const fileInput = document.getElementById('edit-file-input');
-        const uploadZone = document.getElementById('edit-upload-zone');
-
-        if (fileInput && uploadZone) {
-            this.editUploadZoneClickHandler = () => {
-                if (this.editingPortfolio.photos.length < this.maxPhotosPerPortfolio) {
-                    fileInput.click();
-                }
-            };
-            uploadZone.addEventListener('click', this.editUploadZoneClickHandler);
-
-            this.editFileInputChangeHandler = (e) => {
-                this.handleEditFileSelection(e.target.files);
-            };
-            fileInput.addEventListener('change', this.editFileInputChangeHandler);
-        }
-
-        // Close on backdrop click
-        const modal = document.getElementById('portfolio-edit-modal');
-        if (modal) {
-            this.editModalBackdropHandler = (e) => {
-                if (e.target === modal) {
-                    this.hideEditPortfolioModal();
-                }
-            };
-            modal.addEventListener('click', this.editModalBackdropHandler);
-        }
-    }
-
-    removeEditModalEventListeners() {
-        const closeBtn = document.getElementById('edit-modal-close');
-        const cancelBtn = document.getElementById('cancel-edit');
-        const saveBtn = document.getElementById('save-portfolio-btn');
-        const fileInput = document.getElementById('edit-file-input');
-        const uploadZone = document.getElementById('edit-upload-zone');
-        const modal = document.getElementById('portfolio-edit-modal');
-
-        if (closeBtn && this.editModalCloseHandler) {
-            closeBtn.removeEventListener('click', this.editModalCloseHandler);
-        }
-        if (cancelBtn && this.editModalCancelHandler) {
-            cancelBtn.removeEventListener('click', this.editModalCancelHandler);
-        }
-        if (saveBtn && this.editModalSaveHandler) {
-            saveBtn.removeEventListener('click', this.editModalSaveHandler);
-        }
-        if (fileInput && this.editFileInputChangeHandler) {
-            fileInput.removeEventListener('change', this.editFileInputChangeHandler);
-        }
-        if (uploadZone && this.editUploadZoneClickHandler) {
-            uploadZone.removeEventListener('click', this.editUploadZoneClickHandler);
-        }
-        if (modal && this.editModalBackdropHandler) {
-            modal.removeEventListener('click', this.editModalBackdropHandler);
-        }
-    }
-
-    async handleEditFileSelection(files) {
-        if (!this.editingPortfolio || !files || files.length === 0) return;
-
-        const remainingSlots = this.maxPhotosPerPortfolio - this.editingPortfolio.photos.length;
-        const filesToProcess = Array.from(files).slice(0, remainingSlots);
-
-        for (const file of filesToProcess) {
-            if (file.type.startsWith('image/')) {
-                await this.addPhotoToEdit(file);
-            }
-        }
-
-        this.updateEditPhotoGrid();
-    }
-
-    async addPhotoToEdit(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const photo = {
-                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    src: e.target.result,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type
-                };
-                
-                this.editingPortfolio.photos.push(photo);
-                resolve();
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    saveEditedPortfolio() {
-        if (!this.editingPortfolio) return;
-
-        const titleElement = document.getElementById('edit-portfolio-title');
-        const descriptionElement = document.getElementById('edit-portfolio-description');
-
-        if (!titleElement) return;
-
-        const title = titleElement.value.trim();
-        const description = descriptionElement ? descriptionElement.value.trim() : '';
-
-        if (!title) {
-            this.showToast('Please enter a portfolio title', 'error');
-            titleElement.focus();
-            return;
-        }
-
-        // Update portfolio
-        this.editingPortfolio.title = title;
-        this.editingPortfolio.description = description;
-        this.editingPortfolio.updatedAt = new Date().toISOString();
-
-        // Save to storage
-        this.saveUserPortfolios();
-
-        // Update current portfolio if it's the one being edited
-        if (this.currentPortfolio && this.currentPortfolio.id === this.editingPortfolio.id) {
-            this.currentPortfolio = this.editingPortfolio;
-        }
-
-        this.hideEditPortfolioModal();
-        this.updateUI();
-        
-        this.showToast(`Portfolio "${title}" updated successfully!`, 'success', 'Saved');
     }
 
     deletePortfolio(portfolioId) {
         const portfolio = this.portfolios.find(p => p.id === portfolioId);
         if (!portfolio) return;
 
-        this.showConfirmDialog(
-            'Delete Portfolio',
-            `Are you sure you want to delete "${portfolio.title}"? This will permanently remove all ${portfolio.photos.length} photos and cannot be undone.`,
-            () => {
-                this.portfolios = this.portfolios.filter(p => p.id !== portfolioId);
-                this.saveUserPortfolios();
-                
-                if (this.currentPortfolio && this.currentPortfolio.id === portfolioId) {
-                    this.showPortfoliosView();
-                } else {
-                    this.updateUI();
-                }
-                
-                this.showToast(`Portfolio "${portfolio.title}" deleted successfully`, 'success', 'Deleted');
+        if (confirm(`Delete "${portfolio.title}" portfolio? This will permanently remove all ${portfolio.photos.length} photos.`)) {
+            this.portfolios = this.portfolios.filter(p => p.id !== portfolioId);
+            this.saveUserPortfolios();
+            
+            if (this.currentPortfolio && this.currentPortfolio.id === portfolioId) {
+                this.showPortfoliosView();
+            } else {
+                this.updateUI();
             }
-        );
+        }
     }
 
     async handlePortfolioFileSelection(files) {
@@ -1298,33 +1054,23 @@ class ProfessionalPortfolio {
     removePhoto(index) {
         if (!this.currentPortfolio) return;
         
-        this.showConfirmDialog(
-            'Remove Photo',
-            'Are you sure you want to remove this photo from your portfolio?',
-            () => {
-                this.currentPortfolio.photos.splice(index, 1);
-                this.currentPortfolio.updatedAt = new Date().toISOString();
-                this.saveUserPortfolios();
-                this.updateUI();
-                this.showToast('Photo removed from portfolio', 'success', 'Photo Removed');
-            }
-        );
+        if (confirm('Remove this photo from your portfolio?')) {
+            this.currentPortfolio.photos.splice(index, 1);
+            this.currentPortfolio.updatedAt = new Date().toISOString();
+            this.saveUserPortfolios();
+            this.updateUI();
+        }
     }
 
     clearCurrentPortfolio() {
         if (!this.currentPortfolio) return;
         
-        this.showConfirmDialog(
-            'Clear All Photos',
-            `Remove all photos from "${this.currentPortfolio.title}"? This cannot be undone.`,
-            () => {
-                this.currentPortfolio.photos = [];
-                this.currentPortfolio.updatedAt = new Date().toISOString();
-                this.saveUserPortfolios();
-                this.updateUI();
-                this.showToast('All photos removed from portfolio', 'success', 'Portfolio Cleared');
-            }
-        );
+        if (confirm(`Remove all photos from \"${this.currentPortfolio.title}\"? This cannot be undone.`)) {
+            this.currentPortfolio.photos = [];
+            this.currentPortfolio.updatedAt = new Date().toISOString();
+            this.saveUserPortfolios();
+            this.updateUI();
+        }
     }
 
     editCurrentPortfolio() {
@@ -1337,7 +1083,7 @@ class ProfessionalPortfolio {
         
         try {
             if (this.currentPortfolio.photos.length === 0) {
-                this.showToast('Add some photos to your portfolio before sharing!', 'warning', 'No Photos to Share');
+                alert('Add some photos to your portfolio before sharing!');
                 return;
             }
 
@@ -1364,12 +1110,12 @@ class ProfessionalPortfolio {
                 } else {
                     // Fallback: copy to clipboard
                     await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-                    this.showToast('Portfolio link copied to clipboard!', 'success', 'Link Copied');
+                    alert('Portfolio link copied to clipboard!');
                 }
             }
         } catch (error) {
             console.error('Error sharing portfolio:', error);
-            this.showToast('Unable to share portfolio. Please try again.', 'error', 'Share Failed');
+            alert('Unable to share portfolio. Please try again.');
         }
     }
 
@@ -1393,104 +1139,6 @@ class ProfessionalPortfolio {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
         sdk.actions.ready();
-    }
-
-    // Toast Notification System
-    showToast(message, type = 'info', title = null, duration = 4000) {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-
-        const toastId = 'toast-' + Date.now();
-        const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.id = toastId;
-        toast.innerHTML = `
-            <div class="toast-icon">${icons[type] || icons.info}</div>
-            <div class="toast-content">
-                ${title ? `<div class="toast-title">${title}</div>` : ''}
-                <div class="toast-message">${message}</div>
-            </div>
-            <button class="toast-close" onclick="portfolio.removeToast('${toastId}')">×</button>
-        `;
-
-        container.appendChild(toast);
-
-        // Show toast with animation
-        requestAnimationFrame(() => {
-            toast.classList.add('show');
-        });
-
-        // Auto remove after duration
-        if (duration > 0) {
-            setTimeout(() => {
-                this.removeToast(toastId);
-            }, duration);
-        }
-
-        return toastId;
-    }
-
-    removeToast(toastId) {
-        const toast = document.getElementById(toastId);
-        if (toast) {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }
-    }
-
-    // Custom Confirmation Dialog
-    showConfirmDialog(title, message, onConfirm, onCancel = null) {
-        const modal = document.createElement('div');
-        modal.className = 'modal confirm-modal active';
-        modal.innerHTML = `
-            <div class="modal-content confirm-modal-content">
-                <div class="confirm-header">
-                    <div class="confirm-icon">❓</div>
-                    <div class="confirm-title">${title}</div>
-                    <div class="confirm-message">${message}</div>
-                </div>
-                <div class="confirm-actions">
-                    <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
-                    <button class="btn btn-primary" id="confirm-ok">Confirm</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        const cancelBtn = modal.querySelector('#confirm-cancel');
-        const confirmBtn = modal.querySelector('#confirm-ok');
-
-        const cleanup = () => {
-            modal.remove();
-        };
-
-        cancelBtn.addEventListener('click', () => {
-            cleanup();
-            if (onCancel) onCancel();
-        });
-
-        confirmBtn.addEventListener('click', () => {
-            cleanup();
-            onConfirm();
-        });
-
-        // Close on backdrop click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                cleanup();
-                if (onCancel) onCancel();
-            }
-        });
     }
 }
 

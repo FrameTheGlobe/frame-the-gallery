@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Photo Upload Test</title>
+</head>
+<body>
+    <h1>Simple Photo Upload Test</h1>
+    <form id="testForm">
+        <input type="text" id="title" placeholder="Portfolio Title" required>
+        <input type="file" id="photos" multiple accept="image/*">
+        <button type="submit">Create Portfolio</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const fileInput = document.getElementById('photos');
+            const files = fileInput.files;
+            
+            console.log('Title:', title);
+            console.log('Files:', files.length);
+            
+            if (files.length === 0) {
+                alert('Please select photos');
+                return;
+            }
+            
+            const photos = [];
+            let processed = 0;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    photos.push({
+                        id: Date.now() + i,
+                        src: e.target.result,
+                        name: file.name
+                    });
+                    
+                    processed++;
+                    
+                    if (processed === files.length) {
+                        // All files processed
+                        const portfolio = {
+                            id: Date.now().toString(),
+                            title: title,
+                            photos: photos,
+                            createdAt: new Date().toISOString()
+                        };
+                        
+                        console.log('Portfolio created:', portfolio);
+                        document.getElementById('result').innerHTML = 
+                            '<h2>Portfolio Created!</h2>' +
+                            '<p>Title: ' + portfolio.title + '</p>' +
+                            '<p>Photos: ' + portfolio.photos.length + '</p>' +
+                            '<div>' + portfolio.photos.map(p => '<img src="' + p.src + '" width="100" height="100">').join('') + '</div>';
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

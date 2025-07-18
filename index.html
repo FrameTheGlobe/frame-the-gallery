@@ -211,6 +211,83 @@
                 </div>
             </div>
         </div>
+
+        <!-- Portfolio Edit Modal -->
+        <div id="portfolio-edit-modal" class="modal portfolio-modal">
+            <div class="modal-content portfolio-modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">✏️ Edit Portfolio</h2>
+                    <button class="modal-close" id="edit-modal-close">×</button>
+                </div>
+                
+                <div class="modal-body">
+                    <form id="portfolio-edit-form" class="portfolio-form">
+                        <!-- Portfolio Info Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Portfolio Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="edit-portfolio-title" class="form-label">Portfolio Title *</label>
+                                <input 
+                                    type="text" 
+                                    id="edit-portfolio-title" 
+                                    class="form-input" 
+                                    placeholder="e.g., Urban Landscapes, Street Photography, Nature Collection"
+                                    required
+                                    maxlength="100"
+                                >
+                                <div class="form-hint">Give your portfolio a descriptive title (max 100 characters)</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-portfolio-description" class="form-label">Portfolio Description</label>
+                                <textarea 
+                                    id="edit-portfolio-description" 
+                                    class="form-textarea" 
+                                    placeholder="Tell the story behind this portfolio... What inspired these photos? What themes or emotions do they capture?"
+                                    rows="4"
+                                    maxlength="500"
+                                ></textarea>
+                                <div class="form-hint">Optional description to provide context (max 500 characters)</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Photo Management Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Manage Photos</h3>
+                            
+                            <div id="edit-photo-grid" class="photo-preview-grid">
+                                <!-- Existing photos will be displayed here -->
+                            </div>
+                            
+                            <div class="upload-zone" id="edit-upload-zone">
+                                <div class="upload-zone-content">
+                                    <div class="upload-icon">📁</div>
+                                    <div class="upload-text">Add more photos</div>
+                                    <div class="upload-hint">JPG, PNG, WebP • Up to 10MB each • Maximum 10 photos total</div>
+                                </div>
+                            </div>
+                            <input type="file" id="edit-file-input" multiple accept="image/*" style="display: none;">
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="save-portfolio-btn" form="portfolio-edit-form">
+                            <span class="btn-icon">💾</span>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Toast Notification -->
+        <div id="toast-container" class="toast-container">
+            <!-- Toast notifications will be inserted here -->
+        </div>
     </div>
 
     <script type="module" src="app.js"></script>
