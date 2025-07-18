@@ -506,12 +506,17 @@ class ProfessionalPortfolio {
         
         // Form submission
         const form = document.getElementById('portfolio-creation-form');
+        console.log('Form element found:', !!form);
         if (form) {
+            console.log('Setting up form submit handler');
             this.modalFormHandler = (e) => {
+                console.log('Form submit event triggered');
                 e.preventDefault();
                 this.createNewPortfolioFromModal();
             };
             form.addEventListener('submit', this.modalFormHandler);
+        } else {
+            console.error('Portfolio creation form not found!');
         }
         
         // File input and upload zone
@@ -730,29 +735,64 @@ class ProfessionalPortfolio {
     }
     
     createNewPortfolioFromModal() {
-        console.log('createNewPortfolioFromModal called');
-        const titleElement = document.getElementById('portfolio-title');
-        const descriptionElement = document.getElementById('portfolio-description');
+        console.log('=== PORTFOLIO CREATION START ===');
         
-        console.log('Title element:', titleElement);
-        console.log('Description element:', descriptionElement);
+        // Get form elements with multiple fallback methods
+        const modal = document.getElementById('portfolio-creation-modal');
+        const form = document.getElementById('portfolio-creation-form');
         
-        const title = titleElement ? titleElement.value.trim() : '';
-        const description = descriptionElement ? descriptionElement.value.trim() : '';
+        console.log('Modal found:', !!modal);
+        console.log('Form found:', !!form);
         
-        console.log('Title value:', title);
-        console.log('Description value:', description);
+        // Try multiple ways to get the title input
+        let titleElement = document.getElementById('portfolio-title');
+        if (!titleElement && form) {
+            titleElement = form.querySelector('#portfolio-title');
+        }
+        if (!titleElement && modal) {
+            titleElement = modal.querySelector('#portfolio-title');
+        }
         
-        if (!title) {
-            console.log('Title is empty, showing alert');
-            alert('Please enter a portfolio title');
+        // Try multiple ways to get the description textarea
+        let descriptionElement = document.getElementById('portfolio-description');
+        if (!descriptionElement && form) {
+            descriptionElement = form.querySelector('#portfolio-description');
+        }
+        if (!descriptionElement && modal) {
+            descriptionElement = modal.querySelector('#portfolio-description');
+        }
+        
+        console.log('Title element found:', !!titleElement);
+        console.log('Description element found:', !!descriptionElement);
+        
+        if (!titleElement) {
+            console.error('Title element not found!');
+            alert('Error: Could not find title field. Please refresh and try again.');
             return;
         }
         
+        const title = titleElement.value ? titleElement.value.trim() : '';
+        const description = descriptionElement ? (descriptionElement.value ? descriptionElement.value.trim() : '') : '';
+        
+        console.log('Final title value:', `"${title}"`);
+        console.log('Final description value:', `"${description}"`);
+        
+        if (!title || title.length === 0) {
+            console.log('Title validation failed');
+            alert('Please enter a portfolio title');
+            titleElement.focus();
+            return;
+        }
+        
+        console.log('Portfolio count check:', this.portfolios.length, 'max:', this.maxPortfolios);
+        
         if (this.portfolios.length >= this.maxPortfolios) {
+            console.log('Portfolio limit reached');
             alert(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`);
             return;
         }
+        
+        console.log('Creating portfolio with photos:', this.tempPhotos ? this.tempPhotos.length : 0);
         
         const newPortfolio = {
             id: Date.now().toString(),
@@ -763,13 +803,33 @@ class ProfessionalPortfolio {
             updatedAt: new Date().toISOString()
         };
         
-        this.portfolios.push(newPortfolio);
-        this.saveUserPortfolios();
-        this.hideCreatePortfolioModal();
-        this.updateUI();
+        console.log('New portfolio object:', newPortfolio);
         
-        // Show success message
-        alert(`Portfolio "${title}" created successfully!`);
+        try {
+            this.portfolios.push(newPortfolio);
+            console.log('Portfolio added to array, total portfolios:', this.portfolios.length);
+            
+            this.saveUserPortfolios();
+            console.log('Portfolios saved to storage');
+            
+            // Clear temp photos
+            this.tempPhotos = [];
+            console.log('Temp photos cleared');
+            
+            this.hideCreatePortfolioModal();
+            console.log('Modal hidden');
+            
+            this.updateUI();
+            console.log('UI updated');
+            
+            // Show success message
+            alert(`Portfolio "${title}" created successfully!`);
+            console.log('=== PORTFOLIO CREATION SUCCESS ===');
+            
+        } catch (error) {
+            console.error('Error creating portfolio:', error);
+            alert('Error creating portfolio. Please try again.');
+        }
     }
     
     createNewPortfolio() {
