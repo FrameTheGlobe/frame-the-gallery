@@ -730,10 +730,21 @@ class ProfessionalPortfolio {
     }
     
     createNewPortfolioFromModal() {
-        const title = document.getElementById('portfolio-title').value.trim();
-        const description = document.getElementById('portfolio-description').value.trim();
+        console.log('createNewPortfolioFromModal called');
+        const titleElement = document.getElementById('portfolio-title');
+        const descriptionElement = document.getElementById('portfolio-description');
+        
+        console.log('Title element:', titleElement);
+        console.log('Description element:', descriptionElement);
+        
+        const title = titleElement ? titleElement.value.trim() : '';
+        const description = descriptionElement ? descriptionElement.value.trim() : '';
+        
+        console.log('Title value:', title);
+        console.log('Description value:', description);
         
         if (!title) {
+            console.log('Title is empty, showing alert');
             alert('Please enter a portfolio title');
             return;
         }
