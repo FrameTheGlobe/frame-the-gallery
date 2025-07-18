@@ -194,7 +194,7 @@ class ProfessionalPortfolio {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
                 if (this.currentPortfolio && this.currentPortfolio.photos.length < this.maxPhotosPerPortfolio) {
-                    this.handleFileSelection(e.dataTransfer.files);
+                    this.handlePortfolioFileSelection(e.dataTransfer.files);
                 }
             });
         }
@@ -202,7 +202,7 @@ class ProfessionalPortfolio {
         // File selection
         if (fileInput) {
             fileInput.addEventListener('change', (e) => {
-                this.handleFileSelection(e.target.files);
+                this.handlePortfolioFileSelection(e.target.files);
             });
         }
 
@@ -520,9 +520,21 @@ class ProfessionalPortfolio {
         
         console.log('File input found:', !!fileInput);
         console.log('Upload zone found:', !!uploadZone);
+        console.log('File input element:', fileInput);
+        console.log('Upload zone element:', uploadZone);
         
         if (fileInput && uploadZone) {
             console.log('Setting up file input and upload zone');
+            
+            // Click handler for upload zone
+            this.uploadZoneClickHandler = (e) => {
+                console.log('Upload zone clicked, triggering file input');
+                console.log('Click event:', e);
+                console.log('File input before click:', fileInput);
+                fileInput.click();
+                console.log('File input clicked');
+            };
+            uploadZone.addEventListener('click', this.uploadZoneClickHandler);
             
             // File selection
             this.fileInputChangeHandler = (e) => {
@@ -588,6 +600,7 @@ class ProfessionalPortfolio {
             fileInput.removeEventListener('change', this.fileInputChangeHandler);
         }
         if (uploadZone) {
+            if (this.uploadZoneClickHandler) uploadZone.removeEventListener('click', this.uploadZoneClickHandler);
             if (this.dragOverHandler) uploadZone.removeEventListener('dragover', this.dragOverHandler);
             if (this.dragLeaveHandler) uploadZone.removeEventListener('dragleave', this.dragLeaveHandler);
             if (this.dropHandler) uploadZone.removeEventListener('drop', this.dropHandler);
@@ -740,9 +753,9 @@ class ProfessionalPortfolio {
         };
         
         this.portfolios.push(newPortfolio);
-        this.savePortfolios();
+        this.saveUserPortfolios();
         this.hideCreatePortfolioModal();
-        this.renderPortfolios();
+        this.updateUI();
         
         // Show success message
         alert(`Portfolio "${title}" created successfully!`);
@@ -820,7 +833,7 @@ class ProfessionalPortfolio {
         }
     }
 
-    async handleFileSelection(files) {
+    async handlePortfolioFileSelection(files) {
         if (!this.currentPortfolio) return;
         
         const remainingSlots = this.maxPhotosPerPortfolio - this.currentPortfolio.photos.length;
