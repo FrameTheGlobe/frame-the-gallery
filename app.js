@@ -53,33 +53,103 @@ class ProfessionalPortfolio {
 
     async getUserContext() {
         try {
-            // Try to get user context from Farcaster
-            const context = await sdk.context;
+            console.log('Attempting to get Farcaster context...');
+            console.log('Running in Farcaster mini app context:', !!window.parent !== window);
+            
+            // Try to get user context from Farcaster with timeout
+            const contextPromise = sdk.context;
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Context timeout')), 5000)
+            );
+            
+            const context = await Promise.race([contextPromise, timeoutPromise]);
+            
             if (context && context.user) {
                 this.currentUser = context.user;
                 this.userFid = context.user.fid;
-                console.log('User context loaded:', this.currentUser);
+                console.log('✅ Farcaster user context loaded:', this.currentUser);
+                console.log('User FID:', this.userFid);
                 this.updateUserInfo();
+                
+                // Test localStorage in Farcaster context
+                this.testLocalStorage();
             } else {
-                // Fallback: generate a session-based ID for testing
+                console.log('⚠️ No user in Farcaster context, using session ID');
                 this.userFid = this.generateSessionId();
-                console.log('No Farcaster context, using session ID:', this.userFid);
+                console.log('Session ID:', this.userFid);
             }
         } catch (error) {
-            console.error('Error getting user context:', error);
+            console.error('❌ Error getting Farcaster context:', error);
             // Fallback: generate a session-based ID
             this.userFid = this.generateSessionId();
-            console.log('Using fallback session ID:', this.userFid);
+            console.log('🔄 Using fallback session ID:', this.userFid);
+        }
+        
+        // Additional debugging for mini app context
+        console.log('Final userFid:', this.userFid);
+        console.log('localStorage available:', !!window.localStorage);
+        console.log('Farcaster SDK available:', !!window.farcaster);
+    }
+
+    testLocalStorage() {
+        try {
+            const testKey = 'farcaster_test_' + Date.now();
+            const testValue = 'test_data';
+            
+            localStorage.setItem(testKey, testValue);
+            const retrieved = localStorage.getItem(testKey);
+            localStorage.removeItem(testKey);
+            
+            if (retrieved === testValue) {
+                console.log('✅ localStorage working in Farcaster context');
+            } else {
+                console.log('❌ localStorage not working properly in Farcaster context');
+            }
+        } catch (error) {
+            console.error('❌ localStorage error in Farcaster context:', error);
         }
     }
 
     generateSessionId() {
         // Generate a session-based ID for testing without authentication
-        let sessionId = localStorage.getItem('portfolio_session_id');
-        if (!sessionId) {
-            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('portfolio_session_id', sessionId);
+        // In Farcaster context, try multiple storage keys for resilience
+        const possibleKeys = [
+            'portfolio_session_id',
+            'farcaster_portfolio_session',
+            'mini_app_session_id'
+        ];
+        
+        let sessionId = null;
+        
+        // Try to find existing session ID
+        for (const key of possibleKeys) {
+            try {
+                sessionId = localStorage.getItem(key);
+                if (sessionId) {
+                    console.log(`Found existing session ID with key: ${key}`);
+                    break;
+                }
+            } catch (error) {
+                console.log(`Could not access localStorage with key: ${key}`);
+            }
         }
+        
+        // Generate new session ID if none found
+        if (!sessionId) {
+            sessionId = 'farcaster_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            console.log('Generated new session ID:', sessionId);
+            
+            // Try to save with all keys for redundancy
+            for (const key of possibleKeys) {
+                try {
+                    localStorage.setItem(key, sessionId);
+                    console.log(`Saved session ID with key: ${key}`);
+                } catch (error) {
+                    console.log(`Failed to save session ID with key: ${key}`, error);
+                }
+            }
+        }
+        
         return sessionId;
     }
     
@@ -128,26 +198,67 @@ class ProfessionalPortfolio {
             const storageKey = `portfolios_${this.userFid}`;
             const savedPortfolios = localStorage.getItem(storageKey);
             
+            console.log('📁 Loading portfolios:');
+            console.log('- Storage key:', storageKey);
+            console.log('- Raw data found:', !!savedPortfolios);
+            console.log('- Data length:', savedPortfolios ? savedPortfolios.length : 0);
+            
             if (savedPortfolios) {
                 this.portfolios = JSON.parse(savedPortfolios);
-                console.log(`Loaded ${this.portfolios.length} portfolios for user ${this.userFid}`);
+                console.log(`✅ Loaded ${this.portfolios.length} portfolios for user ${this.userFid}`);
+                
+                // Log details of loaded portfolios
+                this.portfolios.forEach((portfolio, index) => {
+                    console.log(`- Portfolio ${index + 1}: "${portfolio.title}" with ${portfolio.photos.length} photos`);
+                    if (portfolio.photos.length > 0) {
+                        console.log(`  - Sample photo: ${portfolio.photos[0].name}, src length: ${portfolio.photos[0].src ? portfolio.photos[0].src.length : 0}`);
+                    }
+                });
             } else {
                 this.portfolios = [];
-                console.log(`No saved portfolios found for user ${this.userFid}`);
+                console.log(`⚠️ No saved portfolios found for user ${this.userFid}`);
             }
         } catch (error) {
-            console.error('Error loading user portfolios:', error);
+            console.error('❌ Error loading user portfolios:', error);
+            console.error('Error details:', error.message);
             this.portfolios = [];
+            this.showToast('Failed to load existing portfolios', 'warning', 'Load Error');
         }
     }
 
     saveUserPortfolios() {
         try {
             const storageKey = `portfolios_${this.userFid}`;
-            localStorage.setItem(storageKey, JSON.stringify(this.portfolios));
-            console.log(`Saved ${this.portfolios.length} portfolios for user ${this.userFid}`);
+            const portfolioData = JSON.stringify(this.portfolios);
+            
+            console.log('💾 Saving portfolios:');
+            console.log('- Storage key:', storageKey);
+            console.log('- Number of portfolios:', this.portfolios.length);
+            console.log('- Data size:', portfolioData.length, 'characters');
+            
+            // Log portfolio summaries
+            this.portfolios.forEach((portfolio, index) => {
+                console.log(`- Portfolio ${index + 1}: "${portfolio.title}" with ${portfolio.photos.length} photos`);
+                if (portfolio.photos.length > 0) {
+                    console.log(`  - First photo src length: ${portfolio.photos[0].src ? portfolio.photos[0].src.length : 0}`);
+                }
+            });
+            
+            localStorage.setItem(storageKey, portfolioData);
+            
+            // Verify the save worked
+            const verification = localStorage.getItem(storageKey);
+            if (verification) {
+                console.log('✅ Save verified - data exists in localStorage');
+            } else {
+                console.error('❌ Save failed - no data found after saving');
+            }
+            
+            console.log(`✅ Saved ${this.portfolios.length} portfolios for user ${this.userFid}`);
         } catch (error) {
-            console.error('Error saving user portfolios:', error);
+            console.error('❌ Error saving user portfolios:', error);
+            console.error('Error details:', error.message);
+            this.showToast('Failed to save portfolio. Storage may be full.', 'error', 'Save Error');
         }
     }
 
@@ -784,8 +895,25 @@ class ProfessionalPortfolio {
     
     createNewPortfolioFromModal() {
         console.log('=== PORTFOLIO CREATION START ===');
-        console.log('tempPhotos at start:', this.tempPhotos);
-        console.log('tempPhotos length at start:', this.tempPhotos ? this.tempPhotos.length : 0);
+        console.log('🔍 Farcaster Context Debug:');
+        console.log('- Running in iframe:', window.parent !== window);
+        console.log('- User FID:', this.userFid);
+        console.log('- Current user:', this.currentUser);
+        console.log('- Storage key will be:', `portfolios_${this.userFid}`);
+        
+        console.log('📸 Photo Debug:');
+        console.log('- tempPhotos at start:', this.tempPhotos);
+        console.log('- tempPhotos length:', this.tempPhotos ? this.tempPhotos.length : 0);
+        console.log('- tempPhotos is array:', Array.isArray(this.tempPhotos));
+        
+        if (this.tempPhotos && this.tempPhotos.length > 0) {
+            console.log('- First photo preview:', {
+                id: this.tempPhotos[0].id,
+                name: this.tempPhotos[0].name,
+                srcLength: this.tempPhotos[0].src ? this.tempPhotos[0].src.length : 0,
+                type: this.tempPhotos[0].type
+            });
+        }
         
         // Get form data
         const titleElement = document.getElementById('portfolio-title');
@@ -1496,6 +1624,57 @@ class ProfessionalPortfolio {
 
 // Make portfolio globally accessible for onclick handlers
 let portfolio;
+
+// Debug functions for troubleshooting
+window.debugPortfolio = function() {
+    console.log('=== PORTFOLIO DEBUG INFO ===');
+    console.log('Portfolio object:', portfolio);
+    console.log('User FID:', portfolio?.userFid);
+    console.log('Current user:', portfolio?.currentUser);
+    console.log('Portfolios count:', portfolio?.portfolios?.length || 0);
+    console.log('Current portfolio:', portfolio?.currentPortfolio);
+    console.log('Temp photos:', portfolio?.tempPhotos);
+    console.log('Running in iframe:', window.parent !== window);
+    console.log('localStorage available:', !!window.localStorage);
+    
+    // Check all portfolio data in localStorage
+    console.log('\n=== LOCALSTORAGE DEBUG ===');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.includes('portfolio')) {
+            const value = localStorage.getItem(key);
+            console.log(`${key}: ${value ? value.length + ' chars' : 'null'}`);
+            
+            if (key.startsWith('portfolios_')) {
+                try {
+                    const data = JSON.parse(value);
+                    console.log(`  - Contains ${data.length} portfolios`);
+                    data.forEach((p, idx) => {
+                        console.log(`    ${idx + 1}. "${p.title}" with ${p.photos.length} photos`);
+                    });
+                } catch (e) {
+                    console.log('  - Failed to parse data');
+                }
+            }
+        }
+    }
+    
+    return portfolio;
+};
+
+window.clearPortfolioData = function() {
+    const confirmed = confirm('Clear all portfolio data? This cannot be undone.');
+    if (confirmed) {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.includes('portfolio')) {
+                localStorage.removeItem(key);
+                console.log('Removed:', key);
+            }
+        }
+        location.reload();
+    }
+};
 
 // Test function to verify portfolio is accessible
 window.testPortfolio = function() {
