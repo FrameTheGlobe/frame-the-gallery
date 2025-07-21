@@ -464,6 +464,11 @@ class ProfessionalPortfolio {
             this.showCreatePortfolioModal();
         });
 
+        // Floating action button
+        document.getElementById('create-portfolio-fab')?.addEventListener('click', () => {
+            this.showCreatePortfolioModal();
+        });
+
         // User avatar click handler
         document.getElementById('user-avatar')?.addEventListener('click', () => {
             this.showUserProfile();
@@ -590,6 +595,75 @@ class ProfessionalPortfolio {
         }
     }
 
+    async sharePortfolioToFarcaster(portfolioId) {
+        const portfolio = this.portfolios.find(p => p.id === portfolioId);
+        if (!portfolio) {
+            this.showToast('Portfolio not found', 'error', 'Share Error');
+            return;
+        }
+
+        try {
+            // Generate portfolio URL
+            const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}`;
+            
+            // Create compelling cast text with portfolio details
+            const photoCount = portfolio.photos.length;
+            const photoText = photoCount === 1 ? 'photo' : 'photos';
+            
+            let castText = `📸 "${portfolio.title}"\n\n`;
+            
+            if (portfolio.description) {
+                // Truncate description to fit cast limits
+                const maxDescLength = 100;
+                const desc = portfolio.description.length > maxDescLength 
+                    ? portfolio.description.substring(0, maxDescLength) + '...'
+                    : portfolio.description;
+                castText += `${desc}\n\n`;
+            }
+            
+            castText += `${photoCount} ${photoText} • Created with FrameTheGallery\n\n`;
+            castText += `View portfolio: ${portfolioUrl}`;
+            
+            // Get the first photo as embed image if available
+            let embedImage = null;
+            if (portfolio.photos.length > 0 && portfolio.photos[0].src) {
+                embedImage = portfolio.photos[0].src;
+            }
+
+            console.log('Sharing portfolio to Farcaster:', { castText, embedImage, portfolioUrl });
+
+            // Use Farcaster SDK to compose cast
+            const result = await sdk.actions.composeCast({
+                text: castText,
+                ...(embedImage && { 
+                    embeds: [{ url: portfolioUrl }] 
+                })
+            });
+
+            console.log('Cast composition result:', result);
+            
+            if (result.success) {
+                this.showToast(`Portfolio "${portfolio.title}" shared to Farcaster!`, 'success', 'Shared Successfully');
+            } else {
+                throw new Error('Failed to compose cast');
+            }
+            
+        } catch (error) {
+            console.error('Error sharing portfolio to Farcaster:', error);
+            
+            // Fallback: copy link to clipboard and show instructions
+            try {
+                const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}`;
+                await navigator.clipboard.writeText(portfolioUrl);
+                
+                this.showToast('Portfolio link copied to clipboard! Paste it in your cast.', 'info', 'Link Copied');
+            } catch (clipboardError) {
+                console.error('Clipboard error:', clipboardError);
+                this.showToast('Unable to share. Please try again.', 'error', 'Share Failed');
+            }
+        }
+    }
+
     showPortfoliosView() {
         this.currentView = 'portfolios';
         this.currentPortfolio = null;
@@ -651,14 +725,21 @@ class ProfessionalPortfolio {
         if (!portfolioGridSection) return;
 
         const emptyStateEl = document.getElementById('empty-state-modern');
+        const fabEl = document.getElementById('create-portfolio-fab');
         
         if (this.portfolios.length === 0) {
-            // Show empty state, clear grid
+            // Show empty state, hide FAB, clear grid
             portfolioGridSection.innerHTML = '';
             if (emptyStateEl) emptyStateEl.style.display = 'block';
+            if (fabEl) fabEl.style.display = 'none';
         } else {
-            // Hide empty state, show portfolios
+            // Hide empty state, show FAB, show portfolios
             if (emptyStateEl) emptyStateEl.style.display = 'none';
+            if (fabEl && this.portfolios.length < this.maxPortfolios) {
+                fabEl.style.display = 'flex';
+            } else if (fabEl) {
+                fabEl.style.display = 'none'; // Hide FAB if at portfolio limit
+            }
             portfolioGridSection.innerHTML = this.portfolios.map(p => this.renderPortfolioCard(p)).join('');
         }
         
@@ -697,6 +778,8 @@ class ProfessionalPortfolio {
                     this.editPortfolio(portfolioId);
                 } else if (action === 'delete-portfolio') {
                     this.deletePortfolio(portfolioId);
+                } else if (action === 'share-portfolio') {
+                    this.sharePortfolioToFarcaster(portfolioId);
                 }
             });
         });
@@ -715,11 +798,21 @@ class ProfessionalPortfolio {
                     }
                     <div class="portfolio-overlay">
                         <div class="portfolio-actions">
+                            <button class="portfolio-action" data-portfolio-id="${portfolio.id}" data-action="share-portfolio" title="Share">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 6L6 18M8 6L16 6L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
                             <button class="portfolio-action" data-portfolio-id="${portfolio.id}" data-action="edit-portfolio" title="Edit">
-                                ✏️
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="m18.5 2.5 3 3L12 15l-4 1 1-4L18.5 2.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </button>
                             <button class="portfolio-action" data-portfolio-id="${portfolio.id}" data-action="delete-portfolio" title="Delete">
-                                🗑️
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6h18M19 6l-1 14H6L5 6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -732,6 +825,12 @@ class ProfessionalPortfolio {
                         <span>•</span>
                         <span>${this.formatDate(new Date(portfolio.updatedAt))}</span>
                     </div>
+                    <button class="portfolio-share-btn" data-portfolio-id="${portfolio.id}" data-action="share-portfolio">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M8 6L16 6L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Share to Cast
+                    </button>
                 </div>
             </div>
         `;
@@ -1747,47 +1846,8 @@ class ProfessionalPortfolio {
     async shareCurrentPortfolio() {
         if (!this.currentPortfolio) return;
         
-        try {
-            if (this.currentPortfolio.photos.length === 0) {
-                this.showToast('Add some photos to your portfolio before sharing!', 'warning', 'No Photos to Share');
-                return;
-            }
-
-            // Try to use Farcaster SDK to compose a cast
-            if (this.currentUser && sdk.actions.composeCast) {
-                // Show loading state for miniapp
-                this.showToast('Opening cast composer...', 'info', 'Share');
-                
-                const portfolioUrl = `https://framethegallery.xyz/portfolio/${this.userFid}/${this.currentPortfolio.id}`;
-                const text = `Check out my \"${this.currentPortfolio.title}\" portfolio on FrameTheGallery! 📸\\n\\n${this.currentPortfolio.description || ''}\\n\\n${this.currentPortfolio.photos.length} photos showcasing my work.\\n\\n${portfolioUrl}`;
-                
-                await sdk.actions.composeCast({
-                    text: text,
-                    embeds: [portfolioUrl]
-                });
-                
-                this.showToast('Cast composer opened!', 'success', 'Share');
-            } else {
-                // Fallback to Web Share API
-                const portfolioUrl = `https://framethegallery.xyz/portfolio/${this.userFid}/${this.currentPortfolio.id}`;
-                const shareData = {
-                    title: `${this.currentPortfolio.title} - Photography Portfolio`,
-                    text: `Check out my \"${this.currentPortfolio.title}\" portfolio! ${this.currentPortfolio.photos.length} photos showcasing my work.`,
-                    url: portfolioUrl
-                };
-
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                } else {
-                    // Fallback: copy to clipboard
-                    await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-                    this.showToast('Portfolio link copied to clipboard!', 'success', 'Link Copied');
-                }
-            }
-        } catch (error) {
-            console.error('Error sharing portfolio:', error);
-            this.showToast('Unable to share portfolio. Please try again.', 'error', 'Share Failed');
-        }
+        // Use the new robust sharing method
+        await this.sharePortfolioToFarcaster(this.currentPortfolio.id);
     }
 
     // Utility methods

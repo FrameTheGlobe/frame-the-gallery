@@ -523,6 +523,34 @@ body {
   flex-shrink: 0;
 }
 
+/* Floating Action Button (for existing portfolios) */
+.fab {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: var(--purple-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  cursor: pointer;
+  z-index: 200;
+  transition: all 0.3s ease;
+  bottom: max(100px, calc(80px + env(safe-area-inset-bottom) + 20px));
+  color: white;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.4);
+}
+
+.fab svg {
+  stroke: white;
+}
 
 /* Bottom Navigation */
 .bottom-nav {
@@ -715,6 +743,29 @@ body {
   gap: 8px;
   font-size: 0.8rem;
   color: #999;
+  margin-bottom: 16px;
+}
+
+.portfolio-share-btn {
+  background: var(--primary-purple);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.portfolio-share-btn:hover {
+  background: var(--light-purple);
+  transform: translateY(-1px);
 }
 
 /* Upload Area */

@@ -16,6 +16,10 @@
     <meta property="fc:frame:button:1:action" content="link" />
     <meta property="fc:frame:button:1:target" content="https://framethegallery.xyz" />
     
+    <!-- Mini App Manifest -->
+    <meta name="fc:manifest" content="https://framethegallery.xyz/manifest.json" />
+    <meta property="og:url" content="https://framethegallery.xyz" />
+    
     <!-- Open Graph -->
     <meta property="og:title" content="FrameTheGallery - Professional Photo Portfolio" />
     <meta property="og:description" content="Showcase your photojournalism work with a clean, professional portfolio gallery" />
@@ -174,7 +178,10 @@
                             🗑️ Clear All Photos
                         </button>
                         <button class="btn" id="share-portfolio">
-                            📤 Share Portfolio
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M8 6L16 6L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Share to Cast
                         </button>
                     </div>
                 </section>
@@ -198,6 +205,12 @@
                 </section>
             </main>
 
+            <!-- Floating Create Button (for when portfolios exist) -->
+            <div class="fab" id="create-portfolio-fab" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
 
             <!-- Bottom Navigation -->
             <nav class="bottom-nav">
