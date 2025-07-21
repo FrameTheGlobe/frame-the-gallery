@@ -10,11 +10,9 @@
     <title>FrameTheGallery - Professional Photo Portfolio</title>
     
     <!-- Farcaster Mini App Meta Tags -->
-    <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="https://framethegallery.xyz/splash.svg" />
-    <meta property="fc:frame:button:1" content="🖼️ View Portfolio" />
-    <meta property="fc:frame:button:1:action" content="link" />
-    <meta property="fc:frame:button:1:target" content="https://framethegallery.xyz" />
+    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://framethegallery.xyz/og-image.png","button":{"title":"📸 View Gallery","action":{"type":"launch_miniapp","url":"https://framethegallery.xyz","name":"FrameTheGallery","splashImageUrl":"https://framethegallery.xyz/splash.svg","splashBackgroundColor":"#667eea"}}}' />
+    <!-- For backward compatibility -->
+    <meta name="fc:frame" content='{"version":"1","imageUrl":"https://framethegallery.xyz/og-image.png","button":{"title":"📸 View Gallery","action":{"type":"launch_frame","url":"https://framethegallery.xyz","name":"FrameTheGallery","splashImageUrl":"https://framethegallery.xyz/splash.svg","splashBackgroundColor":"#667eea"}}}' />
     
     <!-- Mini App Detection -->
     <meta property="og:url" content="https://framethegallery.xyz" />
