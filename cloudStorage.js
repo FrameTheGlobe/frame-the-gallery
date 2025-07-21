@@ -1,10 +1,36 @@
-// Cloud Storage Service for Vercel Blob + KV
+/**
+ * Cloud Storage Service for FrameTheGallery
+ * 
+ * Integrates with Vercel Blob (image storage) and Vercel KV (metadata storage)
+ * to provide persistent, scalable storage for user portfolios across devices.
+ * 
+ * Storage Architecture:
+ * - Images: Vercel Blob with user-namespaced paths
+ * - Portfolio Metadata: Vercel KV with key pattern `portfolios:${userId}`
+ * - View Analytics: Vercel KV with pattern `views:${userId}:${portfolioId}`
+ * 
+ * @class CloudStorageService
+ */
 class CloudStorageService {
+    /**
+     * Initialize the cloud storage service
+     * Sets up the base URL for API calls
+     */
     constructor() {
         this.baseUrl = window.location.origin;
     }
 
-    // Upload image to Vercel Blob
+    /**
+     * Upload a single image to Vercel Blob storage
+     * 
+     * Creates a user-namespaced path and uploads the image with metadata.
+     * Returns a standardized photo object for use in portfolios.
+     * 
+     * @param {File} file - The image file to upload
+     * @param {string} userId - User's FID or session ID for namespacing
+     * @returns {Promise<Object>} Photo object with id, src, name, size, and uploadedAt
+     * @throws {Error} If upload fails or response is not ok
+     */
     async uploadImage(file, userId) {
         try {
             console.log('🌐 Uploading image to cloud:', file.name);

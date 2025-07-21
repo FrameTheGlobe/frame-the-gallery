@@ -1,174 +1,273 @@
-# FrameTheGallery 🖼️
+# FrameTheGallery 📸
 
-A beautiful photo gallery mini app built for the Farcaster ecosystem. Upload, view, and share your favorite photos with the Farcaster community.
+A professional photo portfolio miniapp for the Farcaster ecosystem. Create, manage, and share stunning photography portfolios with cloud storage and cross-device synchronization.
 
-## Features
+## ✨ Features
 
-- 📸 **Photo Upload**: Upload multiple photos with drag-and-drop support
-- 🔍 **Gallery Views**: Switch between grid and list views
-- 🔄 **Sorting Options**: Sort by newest, oldest, or name
-- 🔗 **Farcaster Integration**: Seamless authentication and sharing
-- 📱 **Responsive Design**: Works perfectly on desktop and mobile
-- 🎨 **Modern UI**: Beautiful, intuitive interface with smooth animations
-- 🚀 **Fast Performance**: Optimized loading and rendering
+### 🎯 **Professional Portfolio Management**
+- **Multiple Portfolios**: Create up to 10 portfolios with 10 photos each
+- **Portfolio Metadata**: Add titles, descriptions, and organize by theme
+- **Cloud Storage**: Persistent storage with Vercel Blob (images) + KV (metadata)
+- **Cross-Device Sync**: Access portfolios from any device with Farcaster FID
 
-## Farcaster Mini App Features
+### 📱 **Optimized Miniapp Experience**
+- **Mobile-First Design**: Touch-friendly interface optimized for mobile
+- **Safe Area Support**: Proper handling of device notches and home indicators
+- **Performance Optimized**: Fast loading, smooth animations, efficient rendering
+- **Progressive Enhancement**: Works offline with local storage fallback
 
-- ✅ **SDK Integration**: Built with @farcaster/miniapp-sdk
-- 🔐 **Quick Auth**: Seamless Farcaster authentication
-- 📢 **Cast Sharing**: Share photos directly to Farcaster
-- 👤 **User Context**: Access to user profile and data
-- 🎯 **Manifest Configuration**: Proper mini app discovery setup
+### 🔗 **Farcaster Integration**
+- **Native Authentication**: Seamless Farcaster FID-based user identification
+- **Cast Sharing**: One-click portfolio sharing to Farcaster with rich previews
+- **Public Portfolios**: Shareable URLs with view tracking and analytics
+- **SDK Integration**: Built with @farcaster/miniapp-sdk for native experience
 
-## Getting Started
+### 🛠️ **Technical Features**
+- **Image Compression**: Automatic compression for Farcaster storage constraints
+- **Upload Progress**: Real-time feedback during photo uploads
+- **Error Handling**: Graceful fallbacks and comprehensive error management
+- **Toast Notifications**: User-friendly feedback system
+
+## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js 18+ 
+- Vercel account (for cloud storage)
+- Farcaster account (for testing)
 
-- Node.js 22.11.0 or higher
-- npm, pnpm, or yarn
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd frame-the-gallery
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open your browser and navigate to `http://localhost:3000`
-
-### Building for Production
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/FrameTheGlobe/frame-the-gallery.git
+cd frame-the-gallery
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
 npm run build
 ```
 
-The built files will be in the `dist` directory.
+### Environment Setup
 
-### Deployment
+Create `.env.local` with your Vercel credentials:
 
-This app is configured for deployment on Vercel, but can be deployed to any static hosting service.
+```env
+# Vercel Blob Storage
+BLOB_READ_WRITE_TOKEN=your_blob_token
 
-For Vercel deployment:
+# Vercel KV Storage
+KV_URL=your_kv_url
+KV_REST_API_URL=your_kv_rest_api_url
+KV_REST_API_TOKEN=your_kv_rest_api_token
+KV_REST_API_READ_ONLY_TOKEN=your_kv_rest_api_read_only_token
+```
+
+## 📋 Architecture
+
+### Storage System
+```
+User Data Storage:
+├── Vercel Blob (Images)
+│   └── ${userFid}/${timestamp}_${filename}
+└── Vercel KV (Metadata)
+    ├── portfolios:${userFid} → Portfolio array
+    ├── metadata:${userFid} → User analytics
+    └── views:${userFid}:${portfolioId} → View counts
+```
+
+### Authentication Flow
+```
+1. Farcaster SDK → context.user.fid
+2. Cloud Storage → portfolios:${fid}
+3. Cross-Device Sync → Same FID = Same Data
+4. Fallback → Session-based ID for testing
+```
+
+### API Endpoints
+- `POST /api/upload-image` - Upload photos to Vercel Blob
+- `GET /api/portfolios?userId=${fid}` - Get user's portfolios
+- `POST /api/portfolios` - Save portfolio updates
+- `DELETE /api/portfolios` - Delete specific portfolio
+- `GET /api/portfolio/${userId}/${portfolioId}` - Public portfolio access
+
+## 🎨 UI/UX Design
+
+### Mobile-First Approach
+- **Touch Targets**: Minimum 48px for accessibility
+- **Safe Areas**: env(safe-area-inset-*) support
+- **Performance**: Hardware-accelerated animations
+- **Responsive**: Optimized breakpoints for all devices
+
+### Visual Design
+- **Clean Aesthetic**: Professional photojournalism theme
+- **Typography**: Inter font family for readability
+- **Color Scheme**: High contrast for accessibility
+- **Loading States**: Smooth transitions and feedback
+
+## 🔧 Deployment
+
+### Vercel Deployment (Recommended)
+
 ```bash
+# Deploy to Vercel
 npm run build
 vercel --prod
+
+# Set up environment variables in Vercel dashboard
+# Configure custom domain (optional)
 ```
 
-## Farcaster Mini App Setup
+### Manual Deployment
+
+```bash
+# Build the project
+npm run build
+
+# Deploy the dist/ folder to any static hosting
+# Ensure API routes are configured for your platform
+```
+
+## 📱 Farcaster Integration
 
 ### Manifest Configuration
+Located at `public/.well-known/farcaster.json`:
 
-The app includes a proper Farcaster manifest at `public/.well-known/farcaster.json` with:
-
-- Account association for domain verification
-- Mini app metadata (name, icons, URLs)
-- Proper versioning and categorization
-
-### SDK Integration
-
-The app uses the official Farcaster Mini App SDK for:
-
-- User authentication (`sdk.actions.signIn()`)
-- App lifecycle management (`sdk.actions.ready()`)
-- Cast composition (`sdk.actions.composeCast()`)
-- Context access for user data
+```json
+{
+  "miniapp": {
+    "name": "FrameTheGallery",
+    "url": "https://framethegallery.xyz",
+    "description": "Professional photo portfolio creator",
+    "iconUrl": "https://framethegallery.xyz/icon.svg"
+  }
+}
+```
 
 ### Testing in Farcaster
 
-1. Enable Developer Mode in Farcaster
-2. Deploy your app to a public URL
-3. Update the manifest URLs to match your deployment
-4. Test the app within the Farcaster client
+1. **Deploy**: Deploy to public URL (Vercel, Netlify, etc.)
+2. **Update Manifest**: Update all URLs in farcaster.json
+3. **Developer Mode**: Enable in Farcaster client
+4. **Test Features**: Portfolio creation, sharing, authentication
 
-## Project Structure
+## 📚 Code Documentation
 
+### Main Classes
+
+#### `ProfessionalPortfolio`
+- **Purpose**: Main application controller
+- **Key Methods**: `init()`, `getUserContext()`, `createPortfolio()`, `sharePortfolio()`
+- **State Management**: Portfolios, user data, UI state
+
+#### `CloudStorageService`
+- **Purpose**: Vercel Blob/KV integration
+- **Key Methods**: `uploadImage()`, `savePortfolios()`, `loadPortfolios()`
+- **Fallback**: Automatic localStorage fallback
+
+### Key Features Implementation
+
+#### User Authentication
+```javascript
+// Get Farcaster user context
+const context = await sdk.context;
+this.userFid = context.user.fid; // Unique identifier
 ```
-frame-the-gallery/
-├── public/
-│   └── .well-known/
-│       └── farcaster.json     # Farcaster manifest
-├── index.html                 # Main HTML file
-├── app.js                     # Main application logic
-├── styles.css                 # Styling and animations
-├── vite.config.js            # Vite configuration
-├── package.json              # Dependencies and scripts
-└── README.md                 # This file
+
+#### Portfolio Sharing
+```javascript
+// Native Farcaster cast composer
+await sdk.actions.composeCast({
+    text: portfolioDescription,
+    embeds: [publicPortfolioUrl]
+});
 ```
 
-## Key Components
+#### Cloud Storage
+```javascript
+// Save to Vercel KV with user namespacing
+await kv.set(`portfolios:${userId}`, portfolios);
+```
 
-### FrameTheGallery Class
-The main application class that handles:
-- Photo management and rendering
-- User authentication
-- File uploads
-- Modal interactions
-- Farcaster SDK integration
+## 🎯 Roadmap
 
-### Photo Management
-- Local storage of uploaded photos
-- Sample photos for demonstration
-- Sorting and filtering capabilities
-- Grid and list view modes
+### Version 1.0.2 (Current)
+- [x] Comprehensive documentation
+- [x] Mobile UI/UX optimizations
+- [x] Performance improvements
+- [x] Enhanced error handling
 
-### Farcaster Integration
-- Seamless authentication flow
-- User profile display
-- Photo sharing to Farcaster
-- Context-aware features
+### Version 1.1.0 (Planned)
+- [ ] Portfolio templates and themes
+- [ ] Batch photo operations
+- [ ] Advanced sharing options
+- [ ] Analytics dashboard
 
-## Customization
+### Version 1.2.0 (Future)
+- [ ] Collaborative portfolios
+- [ ] Photo editing tools
+- [ ] Integration with other social platforms
+- [ ] Advanced analytics
 
-### Adding New Features
+## 🤝 Contributing
 
-1. **Photo Filters**: Add image filtering capabilities
-2. **Albums**: Organize photos into collections
-3. **Comments**: Add commenting system
-4. **Likes**: Implement photo rating system
-5. **Search**: Add photo search functionality
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md).
 
-### Styling
+### Development Setup
+```bash
+# Fork the repo, then:
+git clone your-fork-url
+cd frame-the-gallery
+npm install
+npm run dev
+```
 
-The app uses CSS custom properties for easy theming. Key variables:
-- `--primary-color`: Main brand color
-- `--secondary-color`: Secondary accent color
-- `--background-gradient`: Main background gradient
+### Code Style
+- **JavaScript**: ES6+, async/await preferred
+- **CSS**: Mobile-first, BEM methodology
+- **Documentation**: JSDoc for functions, inline comments for complex logic
 
-## Contributing
+## 📊 Performance
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+### Lighthouse Scores (Target)
+- **Performance**: 95+
+- **Accessibility**: 100
+- **Best Practices**: 100
+- **SEO**: 95+
 
-## License
+### Bundle Size
+- **Main JS**: ~350KB (gzipped: ~100KB)
+- **Main CSS**: ~18KB (gzipped: ~4KB)
+- **Images**: Optimized WebP with lazy loading
 
-MIT License - see LICENSE file for details
+## 🛡️ Security
 
-## Support
+- **Input Validation**: File type and size restrictions
+- **CORS**: Proper cross-origin configuration
+- **Data Privacy**: User data isolated by Farcaster FID
+- **Error Handling**: No sensitive information in client errors
 
-For issues or questions:
-- Create an issue on GitHub
-- Reach out on Farcaster (@pirosb3, @linda, @deodad)
+## 📄 License
 
-## Acknowledgments
+MIT License - see [LICENSE](LICENSE) file for details.
 
-- Built with the Farcaster Mini App SDK
-- Uses Unsplash for sample photos
-- Inspired by the Farcaster community
+## 🙏 Acknowledgments
+
+- **Farcaster Team**: For the amazing miniapp SDK and ecosystem
+- **Vercel**: For excellent cloud storage solutions
+- **Inter Font**: For beautiful typography
+- **Community**: Beta testers and feedback providers
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/FrameTheGlobe/frame-the-gallery/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/FrameTheGlobe/frame-the-gallery/discussions)
+- **Farcaster**: [@framethegallery](https://warpcast.com/framethegallery)
 
 ---
 
-**FrameTheGallery** - Bringing beautiful photo sharing to the Farcaster ecosystem! 🖼️✨
+**FrameTheGallery v1.0.2** - Professional photo portfolios for the Farcaster ecosystem 📸✨

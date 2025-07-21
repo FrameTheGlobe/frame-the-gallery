@@ -1,6 +1,35 @@
+/**
+ * FrameTheGallery API - Image Upload Endpoint
+ * 
+ * Handles image uploads to Vercel Blob storage with user-namespaced paths.
+ * Compresses and optimizes images for web delivery while maintaining quality.
+ * 
+ * @module api/upload-image
+ * @version 1.0.2
+ */
+
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
+/**
+ * Upload image to Vercel Blob storage
+ * 
+ * POST /api/upload-image
+ * 
+ * Request Body (FormData):
+ * - file: Image file (JPG, PNG, WebP, max 10MB)
+ * - userId: User's Farcaster FID or session ID
+ * 
+ * Response:
+ * - success: boolean
+ * - url: string (Vercel Blob URL)
+ * - filename: string
+ * - size: number (bytes)
+ * - userId: string
+ * 
+ * @param {Request} request - Next.js API request object
+ * @returns {Promise<NextResponse>} JSON response with upload result
+ */
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -11,9 +40,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Generate unique filename
+    // Generate unique filename with user namespacing
+    // Format: {userId}/{timestamp}_{sanitized_filename}
     const timestamp = Date.now();
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_'); // Sanitize filename
     const filename = `${userId}/${timestamp}_${originalName}`;
 
     // Upload to Vercel Blob
@@ -46,4 +76,5 @@ export async function POST(request) {
   }
 }
 
+// Use Edge Runtime for faster cold starts and global deployment
 export const runtime = 'edge';

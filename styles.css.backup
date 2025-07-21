@@ -1,24 +1,4 @@
-/**
- * FrameTheGallery - Professional Photojournalist Theme - Enhanced
- * 
- * A mobile-first, responsive design optimized for Farcaster miniapp experience.
- * 
- * Design Philosophy:
- * - Clean, professional aesthetic suitable for photojournalism
- * - Mobile-first approach with progressive enhancement
- * - Touch-friendly interactions with proper target sizes
- * - Performance-optimized animations and transitions
- * - Safe area support for various device notches and home indicators
- * 
- * Architecture:
- * - CSS Custom Properties for consistent theming
- * - Flexbox and CSS Grid for responsive layouts
- * - Progressive enhancement for advanced features
- * - Miniapp-specific optimizations for Farcaster integration
- * 
- * @author FrameTheGallery
- * @version 1.0.2
- */
+/**\n * FrameTheGallery - Professional Photojournalist Theme - Enhanced\n * \n * A mobile-first, responsive design optimized for Farcaster miniapp experience.\n * \n * Design Philosophy:\n * - Clean, professional aesthetic suitable for photojournalism\n * - Mobile-first approach with progressive enhancement\n * - Touch-friendly interactions with proper target sizes\n * - Performance-optimized animations and transitions\n * - Safe area support for various device notches and home indicators\n * \n * Architecture:\n * - CSS Custom Properties for consistent theming\n * - Flexbox and CSS Grid for responsive layouts\n * - Progressive enhancement for advanced features\n * - Miniapp-specific optimizations for Farcaster integration\n * \n * @author FrameTheGallery\n * @version 1.0.2\n */"}
 
 /**
  * ==============================================

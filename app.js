@@ -1,29 +1,83 @@
+/**
+ * FrameTheGallery - Professional Photo Portfolio Miniapp
+ * 
+ * A Farcaster miniapp that allows users to create and manage photo portfolios
+ * with cloud storage integration via Vercel Blob and KV.
+ * 
+ * Features:
+ * - Up to 10 portfolios per user with 10 photos each
+ * - Cloud storage with Vercel Blob (images) and KV (metadata)
+ * - Farcaster SDK integration for user authentication and cast sharing
+ * - Mobile-first responsive design optimized for miniapp experience
+ * - Progressive fallback from cloud to local storage
+ * 
+ * @author FrameTheGallery
+ * @version 1.0.2
+ */
+
 import { sdk } from '@farcaster/miniapp-sdk';
 
+/**
+ * Main application class that manages the photo portfolio functionality
+ * Handles user authentication, portfolio management, and cloud storage integration
+ */
 class ProfessionalPortfolio {
+    /**
+     * Initialize the Professional Portfolio application
+     * Sets up all necessary state variables and starts the initialization process
+     */
     constructor() {
-        this.portfolios = [];
-        this.currentPortfolio = null;
-        this.currentUser = null;
-        this.userFid = null;
-        this.maxPortfolios = 10;
-        this.maxPhotosPerPortfolio = 10;
-        this.currentPhotoIndex = 0;
-        this.currentView = 'portfolios'; // 'portfolios' or 'portfolio-detail'
-        this.tempPhotos = []; // For modal photo uploads
-        this.editingPortfolio = null; // For edit modal
-        this.cloudStorage = new CloudStorageService();
-        this.useCloudStorage = true; // Enable cloud storage by default
-        this.uploadProgress = { current: 0, total: 0, currentFile: '' };
+        // Core portfolio data
+        this.portfolios = [];                    // Array of user's portfolios
+        this.currentPortfolio = null;            // Currently selected portfolio for viewing/editing
         
+        // User authentication data from Farcaster SDK
+        this.currentUser = null;                 // Farcaster user object
+        this.userFid = null;                     // Farcaster ID (unique identifier)
+        
+        // Application limits and constraints
+        this.maxPortfolios = 10;                 // Maximum portfolios per user
+        this.maxPhotosPerPortfolio = 10;         // Maximum photos per portfolio
+        
+        // UI state management
+        this.currentPhotoIndex = 0;              // Index for photo modal navigation
+        this.currentView = 'portfolios';         // 'portfolios' or 'portfolio-detail'
+        
+        // Modal and editing state
+        this.tempPhotos = [];                    // Temporary photos during modal upload
+        this.editingPortfolio = null;            // Portfolio being edited in modal
+        
+        // Cloud storage integration
+        this.cloudStorage = new CloudStorageService(); // Vercel Blob/KV service instance
+        this.useCloudStorage = true;             // Flag to enable/disable cloud storage
+        this.uploadProgress = {                  // Progress tracking for file uploads
+            current: 0, 
+            total: 0, 
+            currentFile: ''
+        };
+        
+        // Start the application initialization
         this.init();
     }
 
+    /**
+     * Initialize the application with cloud storage, user authentication, and UI setup
+     * 
+     * This method:
+     * 1. Tests cloud storage connectivity
+     * 2. Sets up event listeners
+     * 3. Authenticates user via Farcaster SDK
+     * 4. Loads user's existing portfolios
+     * 5. Initializes the UI
+     * 
+     * @async
+     * @returns {Promise<void>}
+     */
     async init() {
         try {
             console.log('🌐 Initializing Cloud-Enabled Portfolio...');
             
-            // Test cloud connectivity first
+            // Test cloud connectivity first to determine storage strategy
             if (this.useCloudStorage) {
                 try {
                     const cloudConnected = await this.cloudStorage.testConnection();
@@ -43,10 +97,10 @@ class ProfessionalPortfolio {
                 }
             }
             
-            // Setup event listeners first
+            // Setup DOM event listeners for user interactions
             this.setupEventListeners();
             
-            // Try to get user context from Farcaster
+            // Authenticate user and get Farcaster context (FID, user info)
             await this.getUserContext();
             
             // Load user's portfolios
@@ -59,13 +113,17 @@ class ProfessionalPortfolio {
             this.setupGlobalEventListeners();
             
             // Hide loading screen and show main app
+            // Reduced timeout for better miniapp experience
             setTimeout(() => {
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 
                 // Call Farcaster SDK ready() to hide splash screen
                 sdk.actions.ready();
-            }, 1500);
+                
+                // Add miniapp ready indicator
+                console.log('🚀 Miniapp ready and optimized for mobile experience');
+            }, 800);
             
         } catch (error) {
             console.error('Failed to initialize app:', error);
@@ -74,6 +132,19 @@ class ProfessionalPortfolio {
         }
     }
 
+    /**
+     * Get user authentication context from Farcaster SDK
+     * 
+     * Attempts to retrieve user information from the Farcaster miniapp context.
+     * Falls back to session-based ID if Farcaster context is unavailable.
+     * 
+     * Sets:
+     * - this.currentUser: Farcaster user object
+     * - this.userFid: Unique Farcaster ID for data storage keys
+     * 
+     * @async
+     * @returns {Promise<void>}
+     */
     async getUserContext() {
         try {
             console.log('Attempting to get Farcaster context...');
@@ -133,6 +204,14 @@ class ProfessionalPortfolio {
         }
     }
 
+    /**
+     * Generate a fallback session ID when Farcaster authentication is unavailable
+     * 
+     * Creates a persistent session identifier for users in non-Farcaster contexts
+     * or when authentication fails. Uses multiple localStorage keys for resilience.
+     * 
+     * @returns {string} Session-based user ID
+     */
     generateSessionId() {
         // Generate a session-based ID for testing without authentication
         // In Farcaster context, try multiple storage keys for resilience
@@ -1670,6 +1749,9 @@ class ProfessionalPortfolio {
 
             // Try to use Farcaster SDK to compose a cast
             if (this.currentUser && sdk.actions.composeCast) {
+                // Show loading state for miniapp
+                this.showToast('Opening cast composer...', 'info', 'Share');
+                
                 const portfolioUrl = `https://framethegallery.xyz/portfolio/${this.userFid}/${this.currentPortfolio.id}`;
                 const text = `Check out my \"${this.currentPortfolio.title}\" portfolio on FrameTheGallery! 📸\\n\\n${this.currentPortfolio.description || ''}\\n\\n${this.currentPortfolio.photos.length} photos showcasing my work.\\n\\n${portfolioUrl}`;
                 
@@ -1677,6 +1759,8 @@ class ProfessionalPortfolio {
                     text: text,
                     embeds: [portfolioUrl]
                 });
+                
+                this.showToast('Cast composer opened!', 'success', 'Share');
             } else {
                 // Fallback to Web Share API
                 const portfolioUrl = `https://framethegallery.xyz/portfolio/${this.userFid}/${this.currentPortfolio.id}`;

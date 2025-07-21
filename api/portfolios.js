@@ -1,7 +1,30 @@
+/**
+ * FrameTheGallery API - Portfolio Management Endpoint
+ * 
+ * Handles CRUD operations for user portfolios using Vercel KV storage.
+ * Provides GET (retrieve), POST (save), and DELETE (remove) operations
+ * with user-namespaced data isolation.
+ * 
+ * @module api/portfolios
+ * @version 1.0.2
+ */
+
 import { kv } from '@vercel/kv';
 import { NextResponse } from 'next/server';
 
-// Get user portfolios
+/**
+ * Get user portfolios
+ * 
+ * GET /api/portfolios?userId={fid}
+ * 
+ * Query Parameters:
+ * - userId: User's Farcaster FID or session ID (required)
+ * 
+ * Response:
+ * - success: boolean
+ * - portfolios: Array of portfolio objects
+ * - count: number of portfolios
+ */
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -30,7 +53,20 @@ export async function GET(request) {
   }
 }
 
-// Save user portfolios
+/**
+ * Save user portfolios
+ * 
+ * POST /api/portfolios
+ * 
+ * Request Body:
+ * - userId: User's Farcaster FID or session ID (required)
+ * - portfolios: Array of portfolio objects (required)
+ * 
+ * Response:
+ * - success: boolean
+ * - saved: number of portfolios saved
+ * - metadata: Analytics data
+ */
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -71,7 +107,20 @@ export async function POST(request) {
   }
 }
 
-// Delete specific portfolio
+/**
+ * Delete specific portfolio
+ * 
+ * DELETE /api/portfolios?userId={fid}&portfolioId={id}
+ * 
+ * Query Parameters:
+ * - userId: User's Farcaster FID (required)
+ * - portfolioId: Portfolio ID to delete (required)
+ * 
+ * Response:
+ * - success: boolean
+ * - deleted: Portfolio ID that was deleted
+ * - remaining: Number of portfolios remaining
+ */
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
