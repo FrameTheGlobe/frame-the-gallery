@@ -4,6 +4,13 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
+  "redirects": [
+    {
+      "source": "/.well-known/farcaster.json",
+      "destination": "https://api.farcaster.xyz/miniapps/hosted-manifest/01982f4f-1731-6b2a-e6b5-d0ecf47c3856",
+      "statusCode": 307
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
