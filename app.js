@@ -603,8 +603,8 @@ class ProfessionalPortfolio {
         }
 
         try {
-            // Generate portfolio URL
-            const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}`;
+            // Generate portfolio URL with miniApp parameter
+            const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}&miniApp=true`;
             
             // Create compelling cast text with portfolio details
             const photoCount = portfolio.photos.length;
@@ -632,13 +632,10 @@ class ProfessionalPortfolio {
 
             console.log('Sharing portfolio to Farcaster:', { castText, embedImage, portfolioUrl });
 
-            // Create embed URL using Farcaster's embed format
-            const embedUrl = `https://farcaster.xyz/~/developers/mini-apps/embed?url=${encodeURIComponent(portfolioUrl)}`;
-            
-            // Use Farcaster SDK to compose cast
+            // Use Farcaster SDK to compose cast with direct portfolio URL
             const result = await sdk.actions.composeCast({
                 text: castText,
-                embeds: [embedUrl]
+                embeds: [portfolioUrl]
             });
 
             console.log('Cast composition result:', result);
@@ -652,13 +649,12 @@ class ProfessionalPortfolio {
         } catch (error) {
             console.error('Error sharing portfolio to Farcaster:', error);
             
-            // Fallback: copy embed link to clipboard and show instructions
+            // Fallback: copy portfolio link to clipboard and show instructions
             try {
-                const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}`;
-                const embedUrl = `https://farcaster.xyz/~/developers/mini-apps/embed?url=${encodeURIComponent(portfolioUrl)}`;
-                await navigator.clipboard.writeText(embedUrl);
+                const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}&miniApp=true`;
+                await navigator.clipboard.writeText(portfolioUrl);
                 
-                this.showToast('Embed link copied to clipboard! Paste it in your cast for Mini App preview.', 'info', 'Embed Link Copied');
+                this.showToast('Portfolio link copied to clipboard! Paste it in your cast for Mini App preview.', 'info', 'Link Copied');
             } catch (clipboardError) {
                 console.error('Clipboard error:', clipboardError);
                 this.showToast('Unable to share. Please try again.', 'error', 'Share Failed');

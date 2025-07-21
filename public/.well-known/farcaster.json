@@ -1,31 +1,12 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjEwMTY1MDksInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhmNGUyM0I4MzgzNDlkYzFmOTNCRTQxNGY1NjBjMTQwYmYwMUQ5OTkwIn0",
-    "payload": "eyJkb21haW4iOiJmcmFtZXRoZWdhbGxlcnkueHl6In0",
-    "signature": "MHg2YmQ4NDI4MTQ5ODlkZGY3NWQ0NjY4MWE4MTgzZDc1OGFiZDAyMDg1MDBhZGJiMTdhMzlmMGRmZWE2Zjg3ZmNiNjg3MTc0ZjA3NjRiOWVhNjg4OGIzOGFjYjNjNTcwZjgzZjc5ZTJkZjE2ODc4MDM0NjgwNmUxNzBkYjNjNTdkNDFj"
-  },
-  "miniapp": {
-    "version": "1",
-    "name": "FrameTheGallery",
-    "iconUrl": "https://framethegallery.xyz/logo.svg",
-    "homeUrl": "https://framethegallery.xyz/",
-    "imageUrl": "https://framethegallery.xyz/logo.svg",
-    "buttonTitle": "🖼️ View Gallery",
-    "splashImageUrl": "https://framethegallery.xyz/logo.svg",
-    "splashBackgroundColor": "#7C3AED",
-    "description": "A beautiful photo gallery for the Farcaster community. Upload, view, and share your favorite photos with fellow Farcaster users.",
-    "subtitle": "Photo portfolios for creators",
-    "tagline": "Beautiful photo portfolios",
-    "primaryCategory": "social",
-    "category": "social",
-    "tags": ["photos", "gallery", "social", "portfolio"],
-    "heroImageUrl": "https://framethegallery.xyz/og-image.png",
-    "ogTitle": "FrameTheGallery Portfolio",
-    "ogDescription": "Create beautiful photo portfolios and share them with the Farcaster community.",
-    "ogImageUrl": "https://framethegallery.xyz/og-image.png",
-    "requiredCapabilities": [
-      "actions.signIn",
-      "actions.composeCast"
-    ]
-  }
+  "version": "1",
+  "name": "FrameTheGallery",
+  "homeUrl": "https://framethegallery.xyz",
+  "iconUrl": "https://framethegallery.xyz/logo.svg",
+  "splashImageUrl": "https://framethegallery.xyz/splash.svg",
+  "splashBackgroundColor": "#667eea",
+  "subtitle": "Professional Photo Portfolio",
+  "description": "Showcase your photojournalism work with a clean, professional portfolio gallery",
+  "primaryCategory": "photography",
+  "tags": ["photography", "portfolio", "gallery", "photos"]
 }
