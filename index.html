@@ -32,66 +32,131 @@
     <div id="app">
         <!-- Loading Screen -->
         <div id="loading-screen" class="loading-screen">
-            <div class="loading-content">
-                <div class="loading-logo">📸</div>
-                <h2>FrameTheGallery</h2>
-                <div class="loading-spinner"></div>
-                <p>Preparing your portfolios...</p>
+            <div class="splash-container">
+                <div class="splash-logo">
+                    <img src="logo.svg" alt="FrameTheGallery" class="splash-logo-img">
+                </div>
+                
+                <div class="splash-content">
+                    <h1 class="splash-title">
+                        <span class="title-line">Frame</span>
+                        <span class="title-line highlight">The Gallery</span>
+                    </h1>
+                    
+                    <p class="splash-tagline">
+                        Turn your photos into powerful stories
+                    </p>
+                    
+                    <div class="splash-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="feature-text">Create stunning portfolios</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 6L6 18M8 6L16 6L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="feature-text">Share with Farcaster community</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="feature-text">Showcase your best work</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="splash-footer">
+                    <div class="loading-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p class="loading-text">Loading your creative space...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Main App -->
         <div id="main-app" class="main-app hidden">
-            <!-- Header -->
-            <header class="header">
-                <div class="container">
-                    <div class="header-content">
-                        <div class="logo">
-                            <span class="logo-icon">📸</span>
-                            <h1>FrameTheGallery</h1>
-                        </div>
-                        <div class="user-info">
-                            <div id="user-profile" class="user-profile hidden">
-                                <div class="user-avatar" id="user-avatar"></div>
-                                <span id="user-name" class="user-name"></span>
-                            </div>
-                            <div id="guest-info" class="guest-info">
-                                <span>Professional Portfolio</span>
-                            </div>
-                        </div>
+            <!-- Minimal Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-content">
+                    <div class="app-title">
+                        <img src="logo.svg" alt="FrameTheGallery" class="app-logo">
+                        <span>Gallery</span>
+                    </div>
+                    <div id="user-profile" class="user-profile hidden">
+                        <div class="user-avatar" id="user-avatar"></div>
                     </div>
                 </div>
             </header>
 
             <!-- Main Content -->
-            <main class="container">
-                <!-- Portfolio Header -->
-                <section class="portfolio-header">
-                    <div id="back-button" class="back-button" style="display: none;">
-                        <button class="btn btn-secondary" id="back-to-portfolios-btn" data-action="back-to-portfolios">
-                            ← Back to Portfolios
+            <main class="main-content">
+                <!-- Back Navigation -->
+                <div id="back-button" class="back-nav hidden">
+                    <button class="back-btn" id="back-to-portfolios-btn" data-action="back-to-portfolios">
+                        ← Back
+                    </button>
+                </div>
+
+                <!-- Portfolio Overview -->
+                <section id="portfolio-overview" class="portfolio-overview">
+                    <div class="welcome-card">
+                        <h2 class="welcome-title">Your Portfolios</h2>
+                        <p class="welcome-subtitle">Create beautiful photo stories</p>
+                        <div class="stats">
+                            <span class="stat" id="portfolio-count">0 portfolios</span>
+                            <span class="stat">•</span>
+                            <span class="stat" id="photo-count">0 photos</span>
+                        </div>
+                    </div>
+
+                    <!-- Portfolio Grid -->
+                    <div id="portfolio-grid-section" class="portfolio-grid">
+                        <!-- Portfolio cards will be dynamically loaded here -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state-modern" id="empty-state-modern">
+                        <div class="empty-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2.67004 18.9501L7.60004 15.6401C8.39004 15.1101 9.53004 15.1701 10.24 15.7801L10.57 16.0701C11.35 16.7401 12.61 16.7401 13.39 16.0701L17.55 12.5001C18.33 11.8301 19.59 11.8301 20.37 12.5001L22 13.9001" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>Start Creating</h3>
+                        <p>Create your first portfolio to showcase your photojournalism work</p>
+                        <button class="btn btn-primary empty-create-btn" id="empty-create-portfolio">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Create Portfolio
                         </button>
                     </div>
-                    <h1 class="portfolio-title" id="header-title">Your Photography Portfolios</h1>
-                    <p class="portfolio-subtitle" id="portfolio-subtitle">
-                        Create up to 10 portfolios with 10 photos each to showcase your photojournalism work.
-                    </p>
-                    <div class="portfolio-meta">
-                        <span>0 of 10 portfolios</span>
-                        <span>•</span>
-                        <span>0 total photos</span>
-                    </div>
-                </section>
-
-                <!-- Portfolio Grid Section (for portfolios overview) -->
-                <section id="portfolio-grid-section" class="portfolio-grid-section">
-                    <!-- Portfolio cards will be dynamically loaded here -->
                 </section>
 
                 <!-- Upload Section (for individual portfolio) -->
                 <section class="upload-section" id="upload-section" style="display: none;">
                     <div class="upload-area" id="upload-area">
-                        <div class="upload-icon">📁</div>
+                        <div class="upload-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 15V3M12 3L8 7M12 3L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 15V18C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 19.1046 3 18V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
                         <div class="upload-text">Drop your photos here or click to browse</div>
                         <div class="upload-hint">Maximum 10 photos • JPG, PNG, WebP • Up to 10MB each</div>
                         <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
@@ -121,12 +186,32 @@
 
                 <!-- Empty State (for individual portfolio) -->
                 <section class="empty-state" id="empty-state" style="display: none;">
-                    <div class="empty-state-icon">📸</div>
+                    <div class="empty-state-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <h3>Start Adding Photos</h3>
                     <p>Upload your first photo to begin this portfolio.<br>
                     Each portfolio can contain up to 10 images that tell your story.</p>
                 </section>
             </main>
+
+
+            <!-- Bottom Navigation -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-view="portfolios">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2.67004 18.9501L7.60004 15.6401C8.39004 15.1101 9.53004 15.1701 10.24 15.7801L10.57 16.0701C11.35 16.7401 12.61 16.7401 13.39 16.0701L17.55 12.5001C18.33 11.8301 19.59 11.8301 20.37 12.5001L22 13.9001" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Portfolios</span>
+                </button>
+            </nav>
         </div>
 
         <!-- Photo Modal -->
@@ -143,7 +228,12 @@
         <div id="portfolio-creation-modal" class="modal portfolio-modal">
             <div class="modal-content portfolio-modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title">📸 Create New Portfolio</h2>
+                    <h2 class="modal-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Create New Portfolio
+                    </h2>
                     <button class="modal-close" id="portfolio-modal-close">×</button>
                 </div>
                 
@@ -185,7 +275,12 @@
                             
                             <div class="upload-zone" id="modal-upload-zone">
                                 <div class="upload-zone-content">
-                                    <div class="upload-icon">📁</div>
+                                    <div class="upload-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 15V3M12 3L8 7M12 3L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 15V18C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 19.1046 3 18V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
                                     <div class="upload-text">Drop photos here or click to browse</div>
                                     <div class="upload-hint">JPG, PNG, WebP • Up to 10MB each • Maximum 10 photos</div>
                                 </div>
@@ -262,7 +357,12 @@
                             
                             <div class="upload-zone" id="edit-upload-zone">
                                 <div class="upload-zone-content">
-                                    <div class="upload-icon">📁</div>
+                                    <div class="upload-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 15V3M12 3L8 7M12 3L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 15V18C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 19.1046 3 18V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
                                     <div class="upload-text">Add more photos</div>
                                     <div class="upload-hint">JPG, PNG, WebP • Up to 10MB each • Maximum 10 photos total</div>
                                 </div>

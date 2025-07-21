@@ -459,6 +459,16 @@ class ProfessionalPortfolio {
             this.showCreatePortfolioModal();
         });
 
+        // Empty state create button
+        document.getElementById('empty-create-portfolio')?.addEventListener('click', () => {
+            this.showCreatePortfolioModal();
+        });
+
+        // User avatar click handler
+        document.getElementById('user-avatar')?.addEventListener('click', () => {
+            this.showUserProfile();
+        });
+
         // Portfolio creation modal
         document.getElementById('create-portfolio-btn')?.addEventListener('click', () => {
             this.createNewPortfolio();
@@ -554,10 +564,29 @@ class ProfessionalPortfolio {
     }
 
     updateUI() {
+        // Update stats in welcome card
+        const portfolioCountEl = document.getElementById('portfolio-count');
+        const photoCountEl = document.getElementById('photo-count');
+        
+        if (portfolioCountEl) {
+            portfolioCountEl.textContent = `${this.portfolios.length} portfolios`;
+        }
+        if (photoCountEl) {
+            photoCountEl.textContent = `${this.getTotalPhotoCount()} photos`;
+        }
+
         if (this.currentView === 'portfolios') {
             this.showPortfoliosView();
         } else if (this.currentView === 'portfolio-detail') {
             this.showPortfolioDetailView();
+        }
+    }
+
+    showUserProfile() {
+        if (this.user) {
+            this.showToast(`Welcome, ${this.user.displayName || 'User'}! 👋`, 'info', 'Profile');
+        } else {
+            this.showToast('Please connect your Farcaster account', 'warning', 'Profile');
         }
     }
 
@@ -621,31 +650,16 @@ class ProfessionalPortfolio {
         const portfolioGridSection = document.getElementById('portfolio-grid-section');
         if (!portfolioGridSection) return;
 
+        const emptyStateEl = document.getElementById('empty-state-modern');
+        
         if (this.portfolios.length === 0) {
-            portfolioGridSection.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📁</div>
-                    <h3>Create Your First Portfolio</h3>
-                    <p>Start showcasing your photojournalism work by creating your first portfolio.<br>
-                    Each portfolio can tell a unique story with up to ${this.maxPhotosPerPortfolio} images.</p>
-                    <button class="btn create-portfolio-btn" data-action="create-portfolio">
-                        ➕ Create Portfolio
-                    </button>
-                </div>
-            `;
+            // Show empty state, clear grid
+            portfolioGridSection.innerHTML = '';
+            if (emptyStateEl) emptyStateEl.style.display = 'block';
         } else {
-            const canCreateMore = this.portfolios.length < this.maxPortfolios;
-            portfolioGridSection.innerHTML = `
-                <div class="portfolio-controls">
-                    <div class="portfolio-stats">
-                        ${this.portfolios.length} of ${this.maxPortfolios} portfolios • ${this.getTotalPhotoCount()} total photos
-                    </div>
-                    ${canCreateMore ? `<button class="btn create-portfolio-btn" data-action="create-portfolio">➕ Create Portfolio</button>` : '<span class="limit-reached">Portfolio limit reached</span>'}
-                </div>
-                <div class="portfolio-grid">
-                    ${this.portfolios.map(p => this.renderPortfolioCard(p)).join('')}
-                </div>
-            `;
+            // Hide empty state, show portfolios
+            if (emptyStateEl) emptyStateEl.style.display = 'none';
+            portfolioGridSection.innerHTML = this.portfolios.map(p => this.renderPortfolioCard(p)).join('');
         }
         
         // Setup event listeners for portfolio grid
@@ -653,15 +667,7 @@ class ProfessionalPortfolio {
     }
 
     setupPortfolioGridEventListeners() {
-        // Add event delegation for Create Portfolio buttons
-        const createButtons = document.querySelectorAll('.create-portfolio-btn');
-        createButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Create Portfolio button clicked');
-                this.showCreatePortfolioModal();
-            });
-        });
+        // Note: Create Portfolio functionality now handled by FAB button only
         
         // Add event delegation for portfolio cards
         const portfolioCards = document.querySelectorAll('.portfolio-card');
