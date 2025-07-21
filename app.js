@@ -632,12 +632,13 @@ class ProfessionalPortfolio {
 
             console.log('Sharing portfolio to Farcaster:', { castText, embedImage, portfolioUrl });
 
+            // Create embed URL using Farcaster's embed format
+            const embedUrl = `https://farcaster.xyz/~/developers/mini-apps/embed?url=${encodeURIComponent(portfolioUrl)}`;
+            
             // Use Farcaster SDK to compose cast
             const result = await sdk.actions.composeCast({
                 text: castText,
-                ...(embedImage && { 
-                    embeds: [{ url: portfolioUrl }] 
-                })
+                embeds: [embedUrl]
             });
 
             console.log('Cast composition result:', result);
@@ -651,12 +652,13 @@ class ProfessionalPortfolio {
         } catch (error) {
             console.error('Error sharing portfolio to Farcaster:', error);
             
-            // Fallback: copy link to clipboard and show instructions
+            // Fallback: copy embed link to clipboard and show instructions
             try {
                 const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}`;
-                await navigator.clipboard.writeText(portfolioUrl);
+                const embedUrl = `https://farcaster.xyz/~/developers/mini-apps/embed?url=${encodeURIComponent(portfolioUrl)}`;
+                await navigator.clipboard.writeText(embedUrl);
                 
-                this.showToast('Portfolio link copied to clipboard! Paste it in your cast.', 'info', 'Link Copied');
+                this.showToast('Embed link copied to clipboard! Paste it in your cast for Mini App preview.', 'info', 'Embed Link Copied');
             } catch (clipboardError) {
                 console.error('Clipboard error:', clipboardError);
                 this.showToast('Unable to share. Please try again.', 'error', 'Share Failed');
