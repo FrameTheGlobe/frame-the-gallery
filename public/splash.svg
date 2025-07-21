@@ -4,24 +4,47 @@
       <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
     </linearGradient>
+    <filter id="logoShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
   </defs>
   <rect width="400" height="300" fill="url(#splashBg)"/>
   
-  <!-- Main gallery icon -->
-  <rect x="150" y="80" width="100" height="80" rx="8" fill="white" opacity="0.95"/>
-  <rect x="160" y="90" width="80" height="60" rx="4" fill="#f8f9fa"/>
+  <!-- Logo Container with consistent branding -->
+  <g transform="translate(200, 90)">
+    <rect x="-50" y="-40" width="100" height="80" rx="12" fill="white" opacity="0.95" filter="url(#logoShadow)"/>
+    <!-- Simplified camera/gallery icon representing the logo -->
+    <g transform="translate(-25, -25)">
+      <rect x="10" y="15" width="40" height="30" rx="6" fill="#667eea" opacity="0.8"/>
+      <circle cx="30" cy="30" r="8" fill="white" opacity="0.9"/>
+      <circle cx="30" cy="30" r="5" fill="#667eea"/>
+      <rect x="5" y="10" width="10" height="6" rx="3" fill="#667eea" opacity="0.6"/>
+      <text x="30" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="bold" fill="#667eea" text-anchor="middle">FTG</text>
+    </g>
+  </g>
   
-  <!-- Photo elements -->
-  <circle cx="180" cy="110" r="6" fill="#667eea"/>
-  <polygon points="165,140 185,120 205,130 225,115 235,125 235,150 165,150" fill="#667eea" opacity="0.8"/>
+  <!-- App title with improved typography -->
+  <text x="200" y="200" text-anchor="middle" fill="white" font-size="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="bold">FrameTheGallery</text>
+  <text x="200" y="225" text-anchor="middle" fill="white" font-size="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" opacity="0.9">Professional Photo Portfolios</text>
   
-  <!-- App title -->
-  <text x="200" y="200" text-anchor="middle" fill="white" font-size="24" font-family="Arial, sans-serif" font-weight="bold">FrameTheGallery</text>
-  <text x="200" y="225" text-anchor="middle" fill="white" font-size="14" font-family="Arial, sans-serif" opacity="0.9">Photo Gallery for Farcaster</text>
+  <!-- Loading indicator -->
+  <g transform="translate(200, 250)">
+    <circle cx="-10" cy="0" r="2" fill="white" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite" begin="0s"/>
+    </circle>
+    <circle cx="0" cy="0" r="2" fill="white" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite" begin="0.4s"/>
+    </circle>
+    <circle cx="10" cy="0" r="2" fill="white" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite" begin="0.8s"/>
+    </circle>
+  </g>
   
-  <!-- Decorative elements -->
-  <circle cx="100" cy="50" r="3" fill="white" opacity="0.6"/>
-  <circle cx="320" cy="60" r="2" fill="white" opacity="0.4"/>
-  <circle cx="80" cy="200" r="2" fill="white" opacity="0.5"/>
-  <circle cx="340" cy="220" r="3" fill="white" opacity="0.3"/>
+  <!-- Subtle decorative elements -->
+  <g opacity="0.08">
+    <circle cx="80" cy="40" r="15" fill="white"/>
+    <circle cx="320" cy="50" r="20" fill="white"/>
+    <circle cx="60" cy="200" r="12" fill="white"/>
+    <circle cx="340" cy="220" r="18" fill="white"/>
+  </g>
 </svg>

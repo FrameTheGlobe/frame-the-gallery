@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1200 630" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#gradient)"/>
+  
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+    <filter id="logoShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  
+  <!-- Main Content Container -->
+  <g transform="translate(80, 80)">
+    <!-- Logo Container with white background -->
+    <g transform="translate(40, 40)" filter="url(#logoShadow)">
+      <rect x="0" y="0" width="140" height="140" rx="20" fill="white" opacity="0.95"/>
+      <!-- Simplified camera/gallery icon representing the logo -->
+      <g transform="translate(20, 20)">
+        <rect x="20" y="30" width="80" height="60" rx="10" fill="#667eea" opacity="0.8"/>
+        <circle cx="60" cy="60" r="20" fill="white" opacity="0.9"/>
+        <circle cx="60" cy="60" r="12" fill="#667eea"/>
+        <rect x="10" y="20" width="20" height="12" rx="6" fill="#667eea" opacity="0.6"/>
+        <text x="60" y="110" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#667eea" text-anchor="middle">FTG</text>
+      </g>
+    </g>
+    
+    <!-- App Title -->
+    <text x="220" y="90" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="52" font-weight="bold" fill="white">
+      FrameTheGallery
+    </text>
+    
+    <!-- Subtitle -->
+    <text x="220" y="135" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="26" fill="white" opacity="0.9">
+      Create &amp; Share Professional Photo Portfolios
+    </text>
+    
+    <!-- Feature highlights with better spacing -->
+    <g transform="translate(220, 190)">
+      <g transform="translate(0, 0)">
+        <circle cx="8" cy="8" r="4" fill="#FFD700"/>
+        <text x="25" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" fill="white" opacity="0.85">
+          Up to 10 portfolios with 10 photos each
+        </text>
+      </g>
+      <g transform="translate(0, 40)">
+        <circle cx="8" cy="8" r="4" fill="#87CEEB"/>
+        <text x="25" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" fill="white" opacity="0.85">
+          Cloud storage with Vercel Blob &amp; KV
+        </text>
+      </g>
+      <g transform="translate(0, 80)">
+        <circle cx="8" cy="8" r="4" fill="#98FB98"/>
+        <text x="25" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" fill="white" opacity="0.85">
+          Seamless Farcaster integration
+        </text>
+      </g>
+    </g>
+    
+    <!-- CTA Button with better styling -->
+    <g transform="translate(220, 340)">
+      <rect x="0" y="0" width="220" height="55" rx="27" fill="white" opacity="0.95" filter="url(#shadow)"/>
+      <rect x="2" y="2" width="216" height="51" rx="25" fill="none" stroke="#667eea" stroke-width="2" opacity="0.3"/>
+      <text x="110" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="600" fill="#667eea" text-anchor="middle">
+        📸 View Gallery
+      </text>
+    </g>
+  </g>
+  
+  <!-- Sample photo grid on the right -->
+  <g transform="translate(650, 120)" opacity="0.8">
+    <!-- Photo grid background -->
+    <rect x="0" y="0" width="400" height="300" rx="15" fill="white" opacity="0.1" filter="url(#shadow)"/>
+    
+    <!-- Photo thumbnails -->
+    <g transform="translate(20, 20)">
+      <!-- Row 1 -->
+      <rect x="0" y="0" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="100" y="0" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="200" y="0" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="300" y="0" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      
+      <!-- Row 2 -->
+      <rect x="0" y="80" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="100" y="80" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="200" y="80" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="300" y="80" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      
+      <!-- Row 3 -->
+      <rect x="0" y="160" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      <rect x="100" y="160" width="80" height="60" rx="8" fill="white" opacity="0.9"/>
+      
+      <!-- Add some photo-like elements -->
+      <circle cx="40" cy="30" r="8" fill="#667eea" opacity="0.6"/>
+      <circle cx="140" cy="30" r="8" fill="#764ba2" opacity="0.6"/>
+      <circle cx="240" cy="30" r="8" fill="#FFD700" opacity="0.6"/>
+    </g>
+    
+    <!-- Portfolio label -->
+    <text x="200" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" fill="white" opacity="0.7" text-anchor="middle">
+      Sample Portfolio Preview
+    </text>
+  </g>
+  
+  <!-- Decorative elements with better positioning -->
+  <g opacity="0.08">
+    <circle cx="1000" cy="120" r="90" fill="white"/>
+    <circle cx="1120" cy="350" r="70" fill="white"/>
+    <circle cx="980" cy="520" r="50" fill="white"/>
+    <rect x="50" y="450" width="80" height="80" rx="40" fill="white"/>
+  </g>
+  
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <defs>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="1200" height="630" fill="url(#grid)"/>
+  </g>
+</svg>

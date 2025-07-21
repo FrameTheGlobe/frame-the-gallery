@@ -8,5 +8,10 @@
   "subtitle": "Professional Photo Portfolio",
   "description": "Showcase your photojournalism work with a clean, professional portfolio gallery",
   "primaryCategory": "photography",
-  "tags": ["photography", "portfolio", "gallery", "photos"]
+  "tags": ["photography", "portfolio", "gallery", "photos"],
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEwMTY1MDksInR5cGUiOiJhdXRoIiwia2V5IjoiMHg4Q0ZkMDZBMWRhOTJGODg1OTMzY2QzRkFDQzg5Mzk0ZWI3ZTE4ZTREIn0",
+    "payload": "eyJkb21haW4iOiJmcmFtZXRoZWdhbGxlcnkueHl6In0",
+    "signature": "Hx6IwefEav5NRRrEKqd+NeY/C+hS4zBX4P7JCTWrKYgFufejxJgjFf8EWoDmmggCzVDhMWsy4a2dTNDL+JihJxs="
+  }
 }
