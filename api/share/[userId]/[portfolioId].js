@@ -1,12 +1,12 @@
 import { kv } from '@vercel/kv';
 
 // Dynamic HTML generation for portfolio sharing
-export async function GET(request, { params }) {
+export default async function handler(request, response) {
+  const { userId, portfolioId } = request.query;
+  
   try {
-    const { userId, portfolioId } = params;
-    
     if (!userId || !portfolioId) {
-      return new Response('Invalid portfolio URL', { status: 400 });
+      return response.status(400).send('Invalid portfolio URL');
     }
 
     // Get portfolio data
@@ -14,16 +14,16 @@ export async function GET(request, { params }) {
     const portfolio = portfolios.find(p => p.id === portfolioId);
     
     if (!portfolio) {
-      return new Response('Portfolio not found', { status: 404 });
+      return response.status(404).send('Portfolio not found');
     }
 
-    // Get the first image as the preview image
-    const previewImage = portfolio.images && portfolio.images.length > 0 
-      ? portfolio.images[0].url 
+    // Get the first photo as the preview image
+    const previewImage = portfolio.photos && portfolio.photos.length > 0 
+      ? portfolio.photos[0].src 
       : 'https://framethegallery.xyz/og-image.png';
 
     const portfolioTitle = portfolio.title || 'Portfolio';
-    const portfolioDescription = `${portfolio.images?.length || 0} photos • Created with FrameTheGallery`;
+    const portfolioDescription = `${portfolio.photos?.length || 0} photos • Created with FrameTheGallery`;
     const portfolioUrl = `https://framethegallery.xyz/?portfolio=${userId}_${portfolioId}&miniApp=true`;
 
     // Generate HTML with dynamic meta tags
@@ -77,13 +77,9 @@ export async function GET(request, { params }) {
 </body>
 </html>`;
 
-    return new Response(html, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600'
-      }
-    });
+    response.setHeader('Content-Type', 'text/html');
+    response.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+    return response.status(200).send(html);
 
   } catch (error) {
     console.error('Error generating portfolio share page:', error);
@@ -104,13 +100,7 @@ export async function GET(request, { params }) {
 </body>
 </html>`;
     
-    return new Response(fallbackHtml, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html'
-      }
-    });
+    response.setHeader('Content-Type', 'text/html');
+    return response.status(200).send(fallbackHtml);
   }
 }
-
-export const runtime = 'edge';
