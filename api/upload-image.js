@@ -9,23 +9,35 @@
  */
 
 import { put } from '@vercel/blob';
+import { NextResponse } from 'next/server';
 
 /**
  * Upload image to Vercel Blob storage
  * 
  * POST /api/upload-image
+ * 
+ * Request Body (FormData):
+ * - file: Image file (JPG, PNG, WebP, max 10MB)
+ * - userId: User's Farcaster FID or session ID
+ * 
+ * Response:
+ * - success: boolean
+ * - url: string (Vercel Blob URL)
+ * - filename: string
+ * - size: number (bytes)
+ * - userId: string
+ * 
+ * @param {Request} request - Next.js API request object
+ * @returns {Promise<NextResponse>} JSON response with upload result
  */
-export default async function handler(request, response) {
-  if (request.method !== 'POST') {
-    return response.status(405).json({ error: 'Method not allowed' });
-  }
+export async function POST(request) {
   try {
     const formData = await request.formData();
     const file = formData.get('file');
     const userId = formData.get('userId') || 'anonymous';
     
     if (!file) {
-      return response.status(400).json({ error: 'No file provided' });
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Generate unique filename with user namespacing
@@ -47,7 +59,7 @@ export default async function handler(request, response) {
       userId: userId
     });
 
-    return response.status(200).json({
+    return NextResponse.json({
       success: true,
       url: blob.url,
       filename: filename,
@@ -57,9 +69,12 @@ export default async function handler(request, response) {
 
   } catch (error) {
     console.error('Image upload error:', error);
-    return response.status(500).json({
-      error: 'Failed to upload image', 
-      details: error.message
-    });
+    return NextResponse.json(
+      { error: 'Failed to upload image', details: error.message },
+      { status: 500 }
+    );
   }
 }
+
+// Use Edge Runtime for faster cold starts and global deployment
+export const runtime = 'edge';
