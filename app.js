@@ -106,6 +106,9 @@ class ProfessionalPortfolio {
             // Load user's portfolios
             await this.loadUserPortfolios();
             
+            // Check for shared portfolio URL parameters
+            await this.handleSharedPortfolioURL();
+            
             // Update UI
             this.updateUI();
             
@@ -1377,35 +1380,47 @@ class ProfessionalPortfolio {
         console.log('=== PORTFOLIO CREATION END ===');
     }
     
-    createNewPortfolio() {
-        const title = document.getElementById('portfolio-title').value.trim();
-        const description = document.getElementById('portfolio-description').value.trim();
-        
-        if (!title) {
-            this.showToast('Please enter a portfolio title', 'error', 'Title Required');
-            return;
+    /**
+     * Handle shared portfolio URL parameters
+     * Checks for portfolio parameter in URL and loads the specific portfolio view
+     * Format: ?portfolio=userFid_portfolioId&miniApp=true
+     */
+    async handleSharedPortfolioURL() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const portfolioParam = urlParams.get('portfolio');
+            
+            if (portfolioParam) {
+                console.log('Found portfolio parameter:', portfolioParam);
+                
+                // Parse the portfolio parameter (format: userFid_portfolioId)
+                const parts = portfolioParam.split('_');
+                if (parts.length >= 2) {
+                    const sharedUserFid = parts[0];
+                    const portfolioId = parts.slice(1).join('_'); // Handle portfolio IDs with underscores
+                    
+                    console.log('Parsed shared portfolio:', { sharedUserFid, portfolioId });
+                    
+                    // If it's the current user's portfolio, load it directly
+                    if (sharedUserFid === this.userFid) {
+                        const portfolio = this.portfolios.find(p => p.id === portfolioId);
+                        if (portfolio) {
+                            console.log('Loading own shared portfolio:', portfolio.title);
+                            this.currentPortfolio = portfolio;
+                            this.currentView = 'portfolio-detail';
+                            return;
+                        }
+                    } else {
+                        // Handle shared portfolios from other users
+                        // For now, show a message that this feature is coming soon
+                        console.log('Shared portfolio from another user - feature coming soon');
+                        this.showToast('Viewing shared portfolios from other users is coming soon!', 'info', 'Coming Soon');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error handling shared portfolio URL:', error);
         }
-
-        if (this.portfolios.length >= this.maxPortfolios) {
-            this.showToast(`You can only create up to ${this.maxPortfolios} portfolios. Delete an existing portfolio to create a new one.`, 'warning', 'Portfolio Limit Reached');
-            return;
-        }
-
-        const newPortfolio = {
-            id: Date.now().toString(),
-            title: title,
-            description: description,
-            photos: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-
-        this.portfolios.push(newPortfolio);
-        this.saveUserPortfolios();
-        this.hideCreatePortfolioModal();
-        
-        // Open the new portfolio
-        this.openPortfolio(newPortfolio.id);
     }
 
     openPortfolio(portfolioId) {
