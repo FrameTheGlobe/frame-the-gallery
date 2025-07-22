@@ -6,153 +6,123 @@
  * with user-namespaced data isolation.
  * 
  * @module api/portfolios
- * @version 1.0.2
+ * @version 1.0.3
  */
 
 import { kv } from '@vercel/kv';
-import { NextResponse } from 'next/server';
 
 /**
- * Get user portfolios
+ * Portfolio management API endpoint
  * 
- * GET /api/portfolios?userId={fid}
- * 
- * Query Parameters:
- * - userId: User's Farcaster FID or session ID (required)
- * 
- * Response:
- * - success: boolean
- * - portfolios: Array of portfolio objects
- * - count: number of portfolios
+ * GET /api/portfolios?userId={fid} - Get user portfolios
+ * POST /api/portfolios - Save user portfolios
+ * DELETE /api/portfolios?userId={fid}&portfolioId={id} - Delete specific portfolio
  */
-export async function GET(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+export default async function handler(request, response) {
+  
+  if (request.method === 'GET') {
+    try {
+      const { userId } = request.query;
+      
+      if (!userId) {
+        return response.status(400).json({ error: 'User ID required' });
+      }
+
+      const portfolios = await kv.get(`portfolios:${userId}`) || [];
+      
+      console.log(`Retrieved ${portfolios.length} portfolios for user ${userId}`);
+      
+      return response.status(200).json({
+        success: true,
+        portfolios: portfolios,
+        count: portfolios.length
+      });
+
+    } catch (error) {
+      console.error('Error fetching portfolios:', error);
+      return response.status(500).json({
+        error: 'Failed to fetch portfolios', 
+        details: error.message
+      });
     }
+  }
+  
+  else if (request.method === 'POST') {
+    try {
+      const { userId, portfolios } = request.body;
+      
+      if (!userId || !Array.isArray(portfolios)) {
+        return response.status(400).json({ 
+          error: 'User ID and portfolios array required' 
+        });
+      }
 
-    const portfolios = await kv.get(`portfolios:${userId}`) || [];
-    
-    console.log(`Retrieved ${portfolios.length} portfolios for user ${userId}`);
-    
-    return NextResponse.json({
-      success: true,
-      portfolios: portfolios,
-      count: portfolios.length
-    });
+      // Save to KV store
+      await kv.set(`portfolios:${userId}`, portfolios);
+      
+      // Also save a metadata entry for analytics
+      const metadata = {
+        userId,
+        portfolioCount: portfolios.length,
+        totalPhotos: portfolios.reduce((sum, p) => sum + (p.photos?.length || 0), 0),
+        lastUpdated: new Date().toISOString()
+      };
+      await kv.set(`metadata:${userId}`, metadata);
 
-  } catch (error) {
-    console.error('Error fetching portfolios:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch portfolios', details: error.message },
-      { status: 500 }
-    );
+      console.log(`Saved ${portfolios.length} portfolios for user ${userId}`);
+      
+      return response.status(200).json({
+        success: true,
+        saved: portfolios.length,
+        metadata: metadata
+      });
+
+    } catch (error) {
+      console.error('Error saving portfolios:', error);
+      return response.status(500).json({
+        error: 'Failed to save portfolios', 
+        details: error.message
+      });
+    }
+  }
+  
+  else if (request.method === 'DELETE') {
+    try {
+      const { userId, portfolioId } = request.query;
+      
+      if (!userId || !portfolioId) {
+        return response.status(400).json({ 
+          error: 'User ID and portfolio ID required' 
+        });
+      }
+
+      // Get existing portfolios
+      const portfolios = await kv.get(`portfolios:${userId}`) || [];
+      
+      // Remove the specified portfolio
+      const updatedPortfolios = portfolios.filter(p => p.id !== portfolioId);
+      
+      // Save updated list
+      await kv.set(`portfolios:${userId}`, updatedPortfolios);
+      
+      console.log(`Deleted portfolio ${portfolioId} for user ${userId}`);
+      
+      return response.status(200).json({
+        success: true,
+        deleted: portfolioId,
+        remaining: updatedPortfolios.length
+      });
+
+    } catch (error) {
+      console.error('Error deleting portfolio:', error);
+      return response.status(500).json({
+        error: 'Failed to delete portfolio', 
+        details: error.message
+      });
+    }
+  }
+  
+  else {
+    return response.status(405).json({ error: 'Method not allowed' });
   }
 }
-
-/**
- * Save user portfolios
- * 
- * POST /api/portfolios
- * 
- * Request Body:
- * - userId: User's Farcaster FID or session ID (required)
- * - portfolios: Array of portfolio objects (required)
- * 
- * Response:
- * - success: boolean
- * - saved: number of portfolios saved
- * - metadata: Analytics data
- */
-export async function POST(request) {
-  try {
-    const body = await request.json();
-    const { userId, portfolios } = body;
-    
-    if (!userId || !Array.isArray(portfolios)) {
-      return NextResponse.json({ 
-        error: 'User ID and portfolios array required' 
-      }, { status: 400 });
-    }
-
-    // Save to KV store
-    await kv.set(`portfolios:${userId}`, portfolios);
-    
-    // Also save a metadata entry for analytics
-    const metadata = {
-      userId,
-      portfolioCount: portfolios.length,
-      totalPhotos: portfolios.reduce((sum, p) => sum + p.photos.length, 0),
-      lastUpdated: new Date().toISOString()
-    };
-    await kv.set(`metadata:${userId}`, metadata);
-    
-    console.log(`Saved ${portfolios.length} portfolios for user ${userId}`, metadata);
-    
-    return NextResponse.json({
-      success: true,
-      saved: portfolios.length,
-      metadata: metadata
-    });
-
-  } catch (error) {
-    console.error('Error saving portfolios:', error);
-    return NextResponse.json(
-      { error: 'Failed to save portfolios', details: error.message },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * Delete specific portfolio
- * 
- * DELETE /api/portfolios?userId={fid}&portfolioId={id}
- * 
- * Query Parameters:
- * - userId: User's Farcaster FID (required)
- * - portfolioId: Portfolio ID to delete (required)
- * 
- * Response:
- * - success: boolean
- * - deleted: Portfolio ID that was deleted
- * - remaining: Number of portfolios remaining
- */
-export async function DELETE(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const portfolioId = searchParams.get('portfolioId');
-    
-    if (!userId || !portfolioId) {
-      return NextResponse.json({ 
-        error: 'User ID and Portfolio ID required' 
-      }, { status: 400 });
-    }
-
-    const portfolios = await kv.get(`portfolios:${userId}`) || [];
-    const updatedPortfolios = portfolios.filter(p => p.id !== portfolioId);
-    
-    await kv.set(`portfolios:${userId}`, updatedPortfolios);
-    
-    console.log(`Deleted portfolio ${portfolioId} for user ${userId}`);
-    
-    return NextResponse.json({
-      success: true,
-      deleted: portfolioId,
-      remaining: updatedPortfolios.length
-    });
-
-  } catch (error) {
-    console.error('Error deleting portfolio:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete portfolio', details: error.message },
-      { status: 500 }
-    );
-  }
-}
-
-export const runtime = 'edge';
