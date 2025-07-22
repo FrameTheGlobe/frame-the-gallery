@@ -1,4 +1,4 @@
-import { kv } from '@vercel/kv';
+import { list } from '@vercel/blob';
 
 // Dynamic HTML generation for portfolio sharing
 export default async function handler(request, response) {
@@ -12,9 +12,18 @@ export default async function handler(request, response) {
       return response.status(400).send('Invalid portfolio URL');
     }
 
-    // Get portfolio data
+    // Get portfolio data from Blob storage
     console.log(`📂 Looking up portfolios for user: ${userId}`);
-    const portfolios = await kv.get(`portfolios:${userId}`) || [];
+    const { blobs } = await list({ prefix: `portfolios/${userId}` });
+    const portfolioBlob = blobs.find(blob => blob.pathname.endsWith('.json'));
+    
+    if (!portfolioBlob) {
+      console.log('❌ No portfolio file found for user:', userId);
+      return response.status(404).send('Portfolio not found');
+    }
+    
+    const blobResponse = await fetch(portfolioBlob.url);
+    const portfolios = await blobResponse.json();
     console.log(`📄 Found ${portfolios.length} portfolios for user ${userId}`);
     
     const portfolio = portfolios.find(p => p.id === portfolioId);

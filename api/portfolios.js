@@ -1,42 +1,69 @@
 /**
- * FrameTheGallery API - Portfolio Management Endpoint
+ * FrameTheGallery API - Portfolio Management (Blob Storage)
  * 
- * Handles CRUD operations for user portfolios using Vercel KV storage.
- * Provides GET (retrieve), POST (save), and DELETE (remove) operations
- * with user-namespaced data isolation.
- * 
- * @module api/portfolios
- * @version 1.0.3
+ * Handles CRUD operations for user portfolios using Vercel Blob storage.
+ * Stores portfolio metadata as JSON files in Blob.
  */
 
-import { kv } from '@vercel/kv';
+import { put, list, head } from '@vercel/blob';
 
-/**
- * Portfolio management API endpoint
- * 
- * GET /api/portfolios?userId={fid} - Get user portfolios
- * POST /api/portfolios - Save user portfolios
- * DELETE /api/portfolios?userId={fid}&portfolioId={id} - Delete specific portfolio
- */
 export default async function handler(request, response) {
+  const { userId, portfolioId } = request.query;
   
   if (request.method === 'GET') {
     try {
-      const { userId } = request.query;
-      
       if (!userId) {
         return response.status(400).json({ error: 'User ID required' });
       }
 
-      const portfolios = await kv.get(`portfolios:${userId}`) || [];
+      // Try to find the user's portfolio file in Blob storage
+      const blobPath = `portfolios/${userId}.json`;
       
-      console.log(`Retrieved ${portfolios.length} portfolios for user ${userId}`);
-      
-      return response.status(200).json({
-        success: true,
-        portfolios: portfolios,
-        count: portfolios.length
-      });
+      try {
+        // List blobs to find the user's portfolio file
+        const { blobs } = await list({ prefix: `portfolios/${userId}` });
+        
+        if (blobs.length === 0) {
+          // No portfolios file found, return empty array
+          return response.status(200).json({
+            success: true,
+            portfolios: [],
+            count: 0
+          });
+        }
+        
+        // Get the first matching blob (should be the portfolios.json file)
+        const portfolioBlob = blobs.find(blob => blob.pathname.endsWith('.json'));
+        
+        if (!portfolioBlob) {
+          return response.status(200).json({
+            success: true,
+            portfolios: [],
+            count: 0
+          });
+        }
+        
+        // Fetch the actual content
+        const blobResponse = await fetch(portfolioBlob.url);
+        const portfolios = await blobResponse.json();
+        
+        console.log(`Retrieved ${portfolios.length} portfolios for user ${userId}`);
+        
+        return response.status(200).json({
+          success: true,
+          portfolios: portfolios,
+          count: portfolios.length
+        });
+        
+      } catch (fetchError) {
+        console.log(`Error fetching portfolios for user ${userId}:`, fetchError.message);
+        // Return empty array if file doesn't exist or can't be fetched
+        return response.status(200).json({
+          success: true,
+          portfolios: [],
+          count: 0
+        });
+      }
 
     } catch (error) {
       console.error('Error fetching portfolios:', error);
@@ -49,11 +76,7 @@ export default async function handler(request, response) {
   
   else if (request.method === 'POST') {
     try {
-      // Parse JSON body for POST requests
-      let body = {};
-      if (request.body) {
-        body = typeof request.body === 'string' ? JSON.parse(request.body) : request.body;
-      }
+      const body = JSON.parse(request.body || '{}');
       const { userId, portfolios } = body;
       
       if (!userId || !Array.isArray(portfolios)) {
@@ -62,24 +85,19 @@ export default async function handler(request, response) {
         });
       }
 
-      // Save to KV store
-      await kv.set(`portfolios:${userId}`, portfolios);
-      
-      // Also save a metadata entry for analytics
-      const metadata = {
-        userId,
-        portfolioCount: portfolios.length,
-        totalPhotos: portfolios.reduce((sum, p) => sum + (p.photos?.length || 0), 0),
-        lastUpdated: new Date().toISOString()
-      };
-      await kv.set(`metadata:${userId}`, metadata);
+      // Save portfolios as JSON file to Blob
+      const portfolioData = JSON.stringify(portfolios, null, 2);
+      const blob = await put(`portfolios/${userId}.json`, portfolioData, {
+        access: 'public',
+        addRandomSuffix: false,
+      });
 
-      console.log(`Saved ${portfolios.length} portfolios for user ${userId}`);
+      console.log(`Saved ${portfolios.length} portfolios for user ${userId} to ${blob.url}`);
       
       return response.status(200).json({
         success: true,
         saved: portfolios.length,
-        metadata: metadata
+        url: blob.url
       });
 
     } catch (error) {
@@ -93,22 +111,33 @@ export default async function handler(request, response) {
   
   else if (request.method === 'DELETE') {
     try {
-      const { userId, portfolioId } = request.query;
-      
       if (!userId || !portfolioId) {
         return response.status(400).json({ 
           error: 'User ID and portfolio ID required' 
         });
       }
 
-      // Get existing portfolios
-      const portfolios = await kv.get(`portfolios:${userId}`) || [];
+      // First, get existing portfolios
+      const { blobs } = await list({ prefix: `portfolios/${userId}` });
+      const portfolioBlob = blobs.find(blob => blob.pathname.endsWith('.json'));
+      
+      if (!portfolioBlob) {
+        return response.status(404).json({ error: 'User portfolios not found' });
+      }
+      
+      // Fetch current portfolios
+      const blobResponse = await fetch(portfolioBlob.url);
+      const portfolios = await blobResponse.json();
       
       // Remove the specified portfolio
       const updatedPortfolios = portfolios.filter(p => p.id !== portfolioId);
       
-      // Save updated list
-      await kv.set(`portfolios:${userId}`, updatedPortfolios);
+      // Save updated portfolios back to Blob
+      const portfolioData = JSON.stringify(updatedPortfolios, null, 2);
+      await put(`portfolios/${userId}.json`, portfolioData, {
+        access: 'public',
+        addRandomSuffix: false,
+      });
       
       console.log(`Deleted portfolio ${portfolioId} for user ${userId}`);
       
