@@ -1,0 +1,53 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Background pattern -->
+  <pattern id="dots" patternUnits="userSpaceOnUse" width="60" height="60">
+    <circle cx="15" cy="15" r="2" fill="rgba(255,255,255,0.1)"/>
+    <circle cx="45" cy="45" r="2" fill="rgba(255,255,255,0.1)"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  
+  <!-- Corner frames -->
+  <g stroke="rgba(255,255,255,0.2)" stroke-width="3" fill="none">
+    <!-- Top-left -->
+    <path d="M 30 90 L 30 42 Q 30 30 42 30 L 90 30"/>
+    <!-- Top-right -->
+    <path d="M 1110 30 L 1158 30 Q 1170 30 1170 42 L 1170 90"/>
+    <!-- Bottom-left -->
+    <path d="M 30 540 L 30 588 Q 30 600 42 600 L 90 600"/>
+    <!-- Bottom-right -->
+    <path d="M 1110 600 L 1158 600 Q 1170 600 1170 588 L 1170 540"/>
+  </g>
+  
+  <!-- Logo container -->
+  <g transform="translate(520, 150)">
+    <!-- Logo background -->
+    <rect x="0" y="0" width="160" height="160" rx="24" fill="rgba(255,255,255,0.95)" filter="url(#shadow)"/>
+    <!-- Logo border frame -->
+    <rect x="12" y="12" width="136" height="136" rx="16" fill="none" stroke="#b8c5f2" stroke-width="3" opacity="0.6"/>
+    <!-- Logo F -->
+    <text x="80" y="105" font-family="Inter, sans-serif" font-size="120" font-weight="700" text-anchor="middle" fill="url(#logoGradient)">F</text>
+  </g>
+  
+  <!-- Title -->
+  <text x="600" y="400" font-family="Inter, sans-serif" font-size="64" font-weight="700" text-anchor="middle" fill="white" filter="url(#shadow)">FrameTheGallery</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="450" font-family="Inter, sans-serif" font-size="28" font-weight="400" text-anchor="middle" fill="rgba(255,255,255,0.9)" filter="url(#shadow)">Professional Photo Portfolio</text>
+</svg>
