@@ -5,15 +5,23 @@ export default async function handler(request, response) {
   const { userId, portfolioId } = request.query;
   
   try {
+    console.log('🔍 Sharing endpoint called with:', { userId, portfolioId });
+    
     if (!userId || !portfolioId) {
+      console.log('❌ Invalid parameters:', { userId, portfolioId });
       return response.status(400).send('Invalid portfolio URL');
     }
 
     // Get portfolio data
+    console.log(`📂 Looking up portfolios for user: ${userId}`);
     const portfolios = await kv.get(`portfolios:${userId}`) || [];
+    console.log(`📄 Found ${portfolios.length} portfolios for user ${userId}`);
+    
     const portfolio = portfolios.find(p => p.id === portfolioId);
+    console.log('🎯 Portfolio lookup result:', portfolio ? `Found: ${portfolio.title}` : 'Not found');
     
     if (!portfolio) {
+      console.log('❌ Portfolio not found:', { userId, portfolioId, availableIds: portfolios.map(p => p.id) });
       return response.status(404).send('Portfolio not found');
     }
 
