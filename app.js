@@ -1428,6 +1428,36 @@ class ProfessionalPortfolio {
                     }
                 }
                 
+                // If still not found locally, try to fetch from API (shared portfolio from another user)
+                if (!foundPortfolio) {
+                    console.log('🌐 Portfolio not found locally, trying to fetch from API...');
+                    
+                    try {
+                        // Parse userId and portfolioId from the URL parameter
+                        const parts = portfolioParam.split('_');
+                        if (parts.length >= 3) {
+                            // Format: farcaster_userId_portfolioId or similar
+                            const userId = parts.slice(0, -1).join('_'); // Everything except last part
+                            const portfolioId = parts[parts.length - 1]; // Last part
+                            
+                            console.log('🔍 Fetching portfolio:', { userId, portfolioId });
+                            
+                            const response = await fetch(`/api/portfolio/${userId}/${portfolioId}`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.success && data.portfolio) {
+                                    foundPortfolio = data.portfolio;
+                                    console.log('✅ Successfully fetched shared portfolio:', foundPortfolio.title);
+                                }
+                            } else {
+                                console.log('❌ API request failed:', response.status, response.statusText);
+                            }
+                        }
+                    } catch (apiError) {
+                        console.error('❌ Error fetching shared portfolio from API:', apiError);
+                    }
+                }
+                
                 if (foundPortfolio) {
                     console.log('📸 Portfolio has', foundPortfolio.photos.length, 'photos');
                     
