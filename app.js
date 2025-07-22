@@ -1393,46 +1393,58 @@ class ProfessionalPortfolio {
             if (portfolioParam) {
                 console.log('🔗 Found portfolio parameter:', portfolioParam);
                 
-                // Parse the portfolio parameter (format: userFid_portfolioId)
-                const parts = portfolioParam.split('_');
-                if (parts.length >= 2) {
-                    const sharedUserFid = parts[0];
-                    const portfolioId = parts.slice(1).join('_'); // Handle portfolio IDs with underscores
-                    
-                    console.log('📋 Parsed shared portfolio:', { sharedUserFid, portfolioId });
-                    console.log('👤 Current user FID:', this.userFid);
-                    console.log('📁 Available portfolios:', this.portfolios.map(p => ({ id: p.id, title: p.title })));
-                    
-                    // If it's the current user's portfolio, load it directly
-                    if (sharedUserFid === this.userFid) {
-                        const portfolio = this.portfolios.find(p => p.id === portfolioId);
-                        if (portfolio) {
-                            console.log('✅ Loading own shared portfolio:', portfolio.title);
-                            console.log('📸 Portfolio has', portfolio.photos.length, 'photos');
-                            
-                            // Set the current portfolio and view
-                            this.currentPortfolio = portfolio;
-                            this.currentView = 'portfolio-detail';
-                            
-                            // Force update the UI to show the portfolio detail view
-                            this.showPortfolioDetailView();
-                            
-                            // Show success message
-                            this.showToast(`Viewing shared portfolio: "${portfolio.title}"`, 'success', 'Portfolio Loaded');
-                            
-                            return;
-                        } else {
-                            console.log('❌ Portfolio not found with ID:', portfolioId);
-                            this.showToast('Shared portfolio not found', 'error', 'Portfolio Not Found');
-                        }
-                    } else {
-                        // Handle shared portfolios from other users
-                        // For now, show a message that this feature is coming soon
-                        console.log('🔄 Shared portfolio from another user - feature coming soon');
-                        this.showToast('Viewing shared portfolios from other users is coming soon!', 'info', 'Coming Soon');
+                // Parse the portfolio parameter - search for portfolio ID within the URL parameter
+                // URL format: ?portfolio=farcaster_1753122670880_9lse7qu2c_1753193732201
+                
+                console.log('📋 Searching for portfolio in parameter:', portfolioParam);
+                console.log('📁 Available portfolios:', this.portfolios.map(p => ({ id: p.id, title: p.title })));
+                
+                // Try to find a portfolio that matches any part of the URL parameter
+                let foundPortfolio = null;
+                
+                // Search through all portfolios to find one whose ID appears in the URL parameter
+                for (const portfolio of this.portfolios) {
+                    if (portfolioParam.includes(portfolio.id)) {
+                        foundPortfolio = portfolio;
+                        console.log('✅ Found portfolio by ID match:', portfolio.title, 'ID:', portfolio.id);
+                        break;
                     }
+                }
+                
+                // If no direct match, try parsing different parts of the URL
+                if (!foundPortfolio) {
+                    const parts = portfolioParam.split('_');
+                    console.log('🔍 Trying to parse URL parts:', parts);
+                    
+                    // Try different combinations to find the portfolio ID
+                    for (let i = 1; i < parts.length; i++) {
+                        const possibleId = parts.slice(i).join('_');
+                        const portfolio = this.portfolios.find(p => p.id === possibleId);
+                        if (portfolio) {
+                            foundPortfolio = portfolio;
+                            console.log('✅ Found portfolio by parsed ID:', portfolio.title, 'ID:', possibleId);
+                            break;
+                        }
+                    }
+                }
+                
+                if (foundPortfolio) {
+                    console.log('📸 Portfolio has', foundPortfolio.photos.length, 'photos');
+                    
+                    // Set the current portfolio and view
+                    this.currentPortfolio = foundPortfolio;
+                    this.currentView = 'portfolio-detail';
+                    
+                    // Force update the UI to show the portfolio detail view
+                    this.showPortfolioDetailView();
+                    
+                    // Show success message
+                    this.showToast(`Viewing shared portfolio: "${foundPortfolio.title}"`, 'success', 'Portfolio Loaded');
+                    
+                    return;
                 } else {
-                    console.log('❌ Invalid portfolio parameter format:', portfolioParam);
+                    console.log('❌ Portfolio not found for parameter:', portfolioParam);
+                    this.showToast('Shared portfolio not found', 'error', 'Portfolio Not Found');
                 }
             } else {
                 console.log('ℹ️ No portfolio parameter found in URL');
