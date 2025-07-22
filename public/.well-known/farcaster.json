@@ -1,9 +1,9 @@
 {
   "version": "1",
   "name": "FrameTheGallery",
-  "homeUrl": "https://framethegallery.xyz",
-  "iconUrl": "https://framethegallery.xyz/logo.svg",
-  "splashImageUrl": "https://framethegallery.xyz/splash.svg",
+  "homeUrl": "https://framethegallery.windsurf.build",
+  "iconUrl": "https://framethegallery.windsurf.build/logo.svg",
+  "splashImageUrl": "https://framethegallery.windsurf.build/splash.svg",
   "splashBackgroundColor": "#667eea",
   "subtitle": "Professional Photo Portfolio",
   "description": "Showcase your photojournalism work with a clean, professional portfolio gallery",
@@ -11,7 +11,7 @@
   "tags": ["photography", "portfolio", "gallery", "photos"],
   "accountAssociation": {
     "header": "eyJmaWQiOjEwMTY1MDksInR5cGUiOiJhdXRoIiwia2V5IjoiMHg4Q0ZkMDZBMWRhOTJGODg1OTMzY2QzRkFDQzg5Mzk0ZWI3ZTE4ZTREIn0",
-    "payload": "eyJkb21haW4iOiJmcmFtZXRoZWdhbGxlcnkueHl6In0",
+    "payload": "eyJkb21haW4iOiJmcmFtZXRoZWdhbGxlcnkud2luZHN1cmYuYnVpbGQifQ",
     "signature": "Hx6IwefEav5NRRrEKqd+NeY/C+hS4zBX4P7JCTWrKYgFufejxJgjFf8EWoDmmggCzVDhMWsy4a2dTNDL+JihJxs="
   }
 }
