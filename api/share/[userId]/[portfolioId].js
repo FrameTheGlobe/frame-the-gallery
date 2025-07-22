@@ -34,16 +34,19 @@ export default async function handler(request, response) {
     const portfolioDescription = `${portfolio.photos?.length || 0} photos • Created with FrameTheGallery`;
     const portfolioUrl = `https://framethegallery.xyz/?portfolio=${userId}_${portfolioId}&miniApp=true`;
 
-    // Generate HTML with dynamic meta tags
-    const html = `<!DOCTYPE html>
+    // For social crawlers: Generate HTML with dynamic meta tags
+    // For direct access: Redirect immediately to app with portfolio parameter
+    const userAgent = request.headers['user-agent'] || '';
+    const isSocialCrawler = /facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegram/i.test(userAgent);
+    
+    if (isSocialCrawler) {
+      // Generate rich HTML with meta tags for social previews
+      const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${portfolioTitle} - FrameTheGallery</title>
-    
-    <!-- Standard Meta Tags -->
-    <meta name="description" content="${portfolioDescription}">
     
     <!-- OpenGraph Meta Tags -->
     <meta property="og:url" content="${portfolioUrl}">
@@ -59,35 +62,24 @@ export default async function handler(request, response) {
     <meta name="twitter:description" content="${portfolioDescription}">
     <meta name="twitter:image" content="${previewImage}">
     
-    <!-- Farcaster Frame Meta Tags -->
-    <meta property="fc:frame" content="vNext">
-    <meta property="fc:frame:title" content="${portfolioTitle}">
-    <meta property="fc:frame:image" content="${previewImage}">
-    <meta property="fc:frame:button:1" content="📸 View Gallery">
-    <meta property="fc:frame:button:1:action" content="link">
-    <meta property="fc:frame:button:1:target" content="${portfolioUrl}">
-    
     <!-- Farcaster Mini App Meta Tags -->
     <meta name="fc:miniapp" content='{"version":"1","imageUrl":"${previewImage}","button":{"title":"📸 View ${portfolioTitle}","action":{"type":"launch_miniapp","url":"${portfolioUrl}","name":"FrameTheGallery","splashImageUrl":"https://framethegallery.xyz/splash.svg","splashBackgroundColor":"#667eea"}}}'>
-    
-    <!-- Redirect to main app -->
-    <meta http-equiv="refresh" content="0; url=${portfolioUrl}">
-    <script>
-      window.location.href = "${portfolioUrl}";
-    </script>
 </head>
 <body>
-    <div style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-        <h1>${portfolioTitle}</h1>
-        <p>${portfolioDescription}</p>
-        <p>If you are not redirected automatically, <a href="${portfolioUrl}">click here</a>.</p>
-    </div>
+    <h1>${portfolioTitle}</h1>
+    <p>${portfolioDescription}</p>
 </body>
 </html>`;
-
-    response.setHeader('Content-Type', 'text/html');
-    response.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
-    return response.status(200).send(html);
+      
+      response.setHeader('Content-Type', 'text/html');
+      response.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+      return response.status(200).send(html);
+      
+    } else {
+      // For direct user access: Redirect to main app
+      response.setHeader('Location', portfolioUrl);
+      return response.status(302).send('Redirecting to portfolio...');
+    }
 
   } catch (error) {
     console.error('Error generating portfolio share page:', error);

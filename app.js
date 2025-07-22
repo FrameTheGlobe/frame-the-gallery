@@ -614,7 +614,7 @@ class ProfessionalPortfolio {
                 // If not using cloud storage, force enable it for sharing
                 console.log('🌐 Enabling cloud storage for sharing...');
                 try {
-                    await this.cloudStorage.savePortfolios(this.userFid, this.portfolios);
+                    await this.cloudStorage.savePortfolios(this.portfolios, this.userFid);
                     console.log('✅ Portfolio uploaded to cloud for sharing');
                     this.showToast('Portfolio uploaded to cloud for sharing', 'success', 'Cloud Upload');
                 } catch (uploadError) {
