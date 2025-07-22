@@ -652,10 +652,11 @@ class ProfessionalPortfolio {
 
             console.log('Sharing portfolio to Farcaster:', { castText, embedImage, portfolioUrl });
 
-            // Use Farcaster SDK to compose cast with direct portfolio URL
+            // Use Farcaster SDK to compose cast with sharing endpoint and embed image
             const result = await sdk.actions.composeCast({
                 text: castText,
-                embeds: [portfolioUrl]
+                embeds: [portfolioUrl],
+                ...(embedImage && { images: [embedImage] })
             });
 
             console.log('Cast composition result:', result);
@@ -671,7 +672,7 @@ class ProfessionalPortfolio {
             
             // Fallback: copy portfolio link to clipboard and show instructions
             try {
-                const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}&miniApp=true`;
+                const portfolioUrl = `${window.location.origin}/api/share/${this.userFid}/${portfolioId}`;
                 await navigator.clipboard.writeText(portfolioUrl);
                 
                 this.showToast('Portfolio link copied to clipboard! Paste it in your cast for Mini App preview.', 'info', 'Link Copied');

@@ -46,7 +46,7 @@ export default async function handler(request, response) {
     // For social crawlers: Generate HTML with dynamic meta tags
     // For direct access: Redirect immediately to app with portfolio parameter
     const userAgent = request.headers['user-agent'] || '';
-    const isSocialCrawler = /facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegram/i.test(userAgent);
+    const isSocialCrawler = /facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegram|farcaster/i.test(userAgent);
     
     if (isSocialCrawler) {
       // Generate rich HTML with meta tags for social previews
