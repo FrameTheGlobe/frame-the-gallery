@@ -1,20 +1,20 @@
 import { kv } from '@vercel/kv';
-import { NextResponse } from 'next/server';
 
 // Get specific portfolio for public sharing
-export async function GET(request, { params }) {
+export default async function handler(request, response) {
+  const { userId, portfolioId } = request.query;
+  
   try {
-    const { userId, portfolioId } = params;
     
     if (!userId || !portfolioId) {
-      return NextResponse.json({ error: 'Invalid portfolio URL' }, { status: 400 });
+      return response.status(400).json({ error: 'Invalid portfolio URL' });
     }
 
     const portfolios = await kv.get(`portfolios:${userId}`) || [];
     const portfolio = portfolios.find(p => p.id === portfolioId);
     
     if (!portfolio) {
-      return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 });
+      return response.status(404).json({ error: 'Portfolio not found' });
     }
 
     // Increment view count
@@ -24,7 +24,7 @@ export async function GET(request, { params }) {
 
     console.log(`Public portfolio viewed: ${userId}/${portfolioId}, views: ${currentViews + 1}`);
     
-    return NextResponse.json({
+    return response.status(200).json({
       success: true,
       portfolio: {
         ...portfolio,
@@ -34,11 +34,9 @@ export async function GET(request, { params }) {
 
   } catch (error) {
     console.error('Error fetching public portfolio:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch portfolio', details: error.message },
-      { status: 500 }
-    );
+    return response.status(500).json({
+      error: 'Failed to fetch portfolio', 
+      details: error.message
+    });
   }
 }
-
-export const runtime = 'edge';
