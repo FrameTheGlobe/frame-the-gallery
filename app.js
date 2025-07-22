@@ -106,11 +106,11 @@ class ProfessionalPortfolio {
             // Load user's portfolios
             await this.loadUserPortfolios();
             
-            // Check for shared portfolio URL parameters
-            await this.handleSharedPortfolioURL();
-            
             // Update UI
             this.updateUI();
+            
+            // Check for shared portfolio URL parameters after portfolios are loaded and UI is updated
+            await this.handleSharedPortfolioURL();
             
             // Setup global event listeners
             this.setupGlobalEventListeners();
@@ -1391,7 +1391,7 @@ class ProfessionalPortfolio {
             const portfolioParam = urlParams.get('portfolio');
             
             if (portfolioParam) {
-                console.log('Found portfolio parameter:', portfolioParam);
+                console.log('🔗 Found portfolio parameter:', portfolioParam);
                 
                 // Parse the portfolio parameter (format: userFid_portfolioId)
                 const parts = portfolioParam.split('_');
@@ -1399,27 +1399,46 @@ class ProfessionalPortfolio {
                     const sharedUserFid = parts[0];
                     const portfolioId = parts.slice(1).join('_'); // Handle portfolio IDs with underscores
                     
-                    console.log('Parsed shared portfolio:', { sharedUserFid, portfolioId });
+                    console.log('📋 Parsed shared portfolio:', { sharedUserFid, portfolioId });
+                    console.log('👤 Current user FID:', this.userFid);
+                    console.log('📁 Available portfolios:', this.portfolios.map(p => ({ id: p.id, title: p.title })));
                     
                     // If it's the current user's portfolio, load it directly
                     if (sharedUserFid === this.userFid) {
                         const portfolio = this.portfolios.find(p => p.id === portfolioId);
                         if (portfolio) {
-                            console.log('Loading own shared portfolio:', portfolio.title);
+                            console.log('✅ Loading own shared portfolio:', portfolio.title);
+                            console.log('📸 Portfolio has', portfolio.photos.length, 'photos');
+                            
+                            // Set the current portfolio and view
                             this.currentPortfolio = portfolio;
                             this.currentView = 'portfolio-detail';
+                            
+                            // Force update the UI to show the portfolio detail view
+                            this.showPortfolioDetailView();
+                            
+                            // Show success message
+                            this.showToast(`Viewing shared portfolio: "${portfolio.title}"`, 'success', 'Portfolio Loaded');
+                            
                             return;
+                        } else {
+                            console.log('❌ Portfolio not found with ID:', portfolioId);
+                            this.showToast('Shared portfolio not found', 'error', 'Portfolio Not Found');
                         }
                     } else {
                         // Handle shared portfolios from other users
                         // For now, show a message that this feature is coming soon
-                        console.log('Shared portfolio from another user - feature coming soon');
+                        console.log('🔄 Shared portfolio from another user - feature coming soon');
                         this.showToast('Viewing shared portfolios from other users is coming soon!', 'info', 'Coming Soon');
                     }
+                } else {
+                    console.log('❌ Invalid portfolio parameter format:', portfolioParam);
                 }
+            } else {
+                console.log('ℹ️ No portfolio parameter found in URL');
             }
         } catch (error) {
-            console.error('Error handling shared portfolio URL:', error);
+            console.error('❌ Error handling shared portfolio URL:', error);
         }
     }
 
