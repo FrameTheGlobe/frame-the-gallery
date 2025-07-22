@@ -49,7 +49,12 @@ export default async function handler(request, response) {
   
   else if (request.method === 'POST') {
     try {
-      const { userId, portfolios } = request.body;
+      // Parse JSON body for POST requests
+      let body = {};
+      if (request.body) {
+        body = typeof request.body === 'string' ? JSON.parse(request.body) : request.body;
+      }
+      const { userId, portfolios } = body;
       
       if (!userId || !Array.isArray(portfolios)) {
         return response.status(400).json({ 
