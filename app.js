@@ -606,8 +606,8 @@ class ProfessionalPortfolio {
         }
 
         try {
-            // Generate portfolio URL with miniApp parameter
-            const portfolioUrl = `${window.location.origin}/?portfolio=${this.userFid}_${portfolioId}&miniApp=true`;
+            // Generate portfolio URL with sharing endpoint for better meta tags
+            const portfolioUrl = `${window.location.origin}/api/share/${this.userFid}/${portfolioId}`;
             
             // Create compelling cast text with portfolio details
             const photoCount = portfolio.photos.length;
