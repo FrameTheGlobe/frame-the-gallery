@@ -606,6 +606,23 @@ class ProfessionalPortfolio {
         }
 
         try {
+            // Ensure portfolio is saved to cloud storage before sharing
+            if (this.useCloudStorage) {
+                console.log('💾 Ensuring portfolio is saved to cloud before sharing...');
+                await this.saveUserPortfolios();
+            } else {
+                // If not using cloud storage, force enable it for sharing
+                console.log('🌐 Enabling cloud storage for sharing...');
+                try {
+                    await this.cloudStorage.savePortfolios(this.userFid, this.portfolios);
+                    console.log('✅ Portfolio uploaded to cloud for sharing');
+                    this.showToast('Portfolio uploaded to cloud for sharing', 'success', 'Cloud Upload');
+                } catch (uploadError) {
+                    console.error('❌ Failed to upload portfolio to cloud:', uploadError);
+                    this.showToast('Failed to upload to cloud. Portfolio may not be shareable.', 'warning', 'Upload Warning');
+                }
+            }
+            
             // Generate portfolio URL with sharing endpoint for better meta tags
             const portfolioUrl = `${window.location.origin}/api/share/${this.userFid}/${portfolioId}`;
             
