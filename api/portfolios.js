@@ -76,8 +76,7 @@ export default async function handler(request, response) {
   
   else if (request.method === 'POST') {
     try {
-      const body = JSON.parse(request.body || '{}');
-      const { userId, portfolios } = body;
+      const { userId, portfolios } = request.body;
       
       if (!userId || !Array.isArray(portfolios)) {
         return response.status(400).json({ 
