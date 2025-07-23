@@ -76,6 +76,8 @@ export default async function handler(request, response) {
   
   else if (request.method === 'POST') {
     try {
+      console.log('🔥 DEBUG: POST request received');
+      console.log('🔥 DEBUG: request.body:', JSON.stringify(request.body, null, 2));
       const { userId, portfolios } = request.body;
       
       if (!userId || !Array.isArray(portfolios)) {
